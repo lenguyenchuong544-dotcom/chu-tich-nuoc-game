@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { DecisionCard as CardData } from '../data/cards';
+import { DecisionCard as CardData, CardChoice } from '../data/cards';
 import { CharacterAvatar } from './CharacterAvatar';
 import { sound } from '../lib/sound';
 import { ShieldAlert, BookOpen, Sparkles, FileText, ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
@@ -23,6 +23,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isExiting, setIsExiting] = useState<'left' | 'right' | null>(null);
+  const [committedStamp, setCommittedStamp] = useState<'left' | 'right' | null>(null);
 
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -44,7 +45,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
   // Keyboard controls (Arrow keys)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (disabled || isExiting) return;
+      if (disabled || isExiting || committedStamp) return;
       if (e.key === 'ArrowLeft') {
         handleTriggerChoice('left');
       } else if (e.key === 'ArrowRight') {
@@ -53,7 +54,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [card, disabled, isExiting]);
+  }, [card, disabled, isExiting, committedStamp]);
 
   const handleTriggerChoice = (direction: 'left' | 'right') => {
     if (disabled || isExiting) return;
@@ -352,6 +353,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({
           </div>
         </button>
 
+        {/* Choice B Button */}
         <button
           onClick={() => handleTriggerChoice('right')}
           disabled={disabled || !!isExiting}

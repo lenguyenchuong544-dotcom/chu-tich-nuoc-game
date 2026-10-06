@@ -36,6 +36,7 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
             <path d="M50 44 V56 M46 47 H54" stroke="#14634B" strokeWidth="2" strokeLinecap="round" />
           </g>
         );
+
       case 'security': // Bộ trưởng Nội vụ & An ninh
         return (
           <g>
@@ -53,6 +54,7 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
             <circle cx="60" cy="60" r="7" fill="#FF7FB0" stroke="#FFF" strokeWidth="1.5" />
           </g>
         );
+
       case 'culture': // Bộ trưởng Văn hóa - Giáo dục
         return (
           <g>
@@ -71,6 +73,7 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
             <path d="M38 44 L42 48 L52 38" fill="none" stroke="#14634B" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
           </g>
         );
+
       default:
         return (
           <g>

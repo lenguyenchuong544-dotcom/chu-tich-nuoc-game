@@ -6,7 +6,8 @@
     "build": "tsc",
     "start": "ts-node src/main.ts",
     "start:dev": "ts-node-dev --respawn src/main.ts",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main.js",
+    "tunnel": "ngrok http 4000 --url=resurface-exert-reaffirm.ngrok-free.dev"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",

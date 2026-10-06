@@ -29,6 +29,9 @@ interface LeaderboardItem {
   lastActiveAt: number;
 }
 
+import { m } from 'framer-motion';
+import { springs } from '@/lib/motion';
+
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -179,10 +182,7 @@ export default function LeaderboardPage() {
               <div className="mt-2 px-3 py-0.5 rounded-pill bg-blush-surface text-peony-700 font-bold text-xs font-mono tabular-nums border border-blush-deep">
                 {top3.totalScore} Điểm
               </div>
-            </div>
-          )}
-        </section>
-      )}
+            )}
 
       {/* Main Ranking Table */}
       <main className="max-w-5xl mx-auto rounded-2xl bg-cotton border-2 border-blush-deep shadow-dossier overflow-hidden my-4">

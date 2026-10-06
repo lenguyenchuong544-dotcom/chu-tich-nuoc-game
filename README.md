@@ -92,31 +92,75 @@ Dữ liệu thẻ bài được tổ chức thành object chuẩn TypeScript/JSO
 
 ---
 
-## 🚀 HƯỚNG DẪN KHỞI ĐỘNG HỆ THỐNG
+## 🚀 HƯỚNG DẪN KHỞI ĐỘNG HỆ THỐNG & DEPLOY HYBRID
 
-### Cách 1: Khởi động 1-Click trên Windows
+Hệ thống hỗ trợ mô hình triển khai: **Client trên GitHub Pages + Server Backend chạy Local kết nối qua Ngrok Tunnel**.
+
+### 🌐 Thông tin Tên miền Tunnel (Ngrok Dev Domain)
+- **Domain cố định:** `https://resurface-exert-reaffirm.ngrok-free.dev`
+- **Port Backend nội bộ:** `http://localhost:4000`
+- **Đã tích hợp tự động:** Header `ngrok-skip-browser-warning: true` và CORS phản hồi linh hoạt cho GitHub Pages.
+
+---
+
+### Cách 1: Khởi động 1-Click trên Windows (Chạy Server + Tunnel + Client)
 Nhấp đúp chuột vào file:
 ```cmd
 start_all.bat
 ```
+*(Script sẽ tự động mở 3 cửa sổ: Backend NestJS, Ngrok Tunnel cố định, và Frontend NextJS)*
+
+Hoặc chỉ bật riêng Tunnel nếu backend đã chạy:
+```cmd
+start_tunnel.bat
+```
+
+---
 
 ### Cách 2: Khởi động thủ công bằng dòng lệnh
 
-**Bước 1: Khởi động Backend NestJS (Cổng 4000)**
+**Bước 1: Khởi động Backend (Cổng 4000)**
 ```bash
-cd backend
-node dist/main.js
-```
-
-**Bước 2: Khởi động Frontend NextJS (Cổng 3000)**
-```bash
-cd frontend
+cd server
 npm run start
 ```
 
+**Bước 2: Mở Ngrok Tunnel ra Internet**
+```bash
+npm run tunnel
+# hoặc chạy: ngrok http 4000 --url=resurface-exert-reaffirm.ngrok-free.dev
+```
+
+**Bước 3: Khởi động Client**
+```bash
+cd client
+npm run start
+```
+
+---
+
+### 🚀 Cách Deploy Client lên GitHub Pages
+
+#### Cách tự động (Được khuyên dùng - GitHub Actions):
+1. Đã cấu hình sẵn file [`.github/workflows/deploy-gh-pages.yml`](file:///.github/workflows/deploy-gh-pages.yml).
+2. Vào GitHub Repository ➔ **Settings** ➔ **Pages** ➔ Mục **Build and deployment** chọn **Source: GitHub Actions**.
+3. Mỗi khi bạn `git push` lên branch `main` (hoặc `leeduc`), GitHub Actions sẽ tự động build static export và deploy lên:
+   👉 **`https://lenguyenchuong544-dotcom.github.io/chu-tich-nuoc-game/`**
+
+#### Cách build tĩnh thủ công:
+Tại thư mục gốc:
+```bash
+npm run build:export
+```
+Thư mục tĩnh hoàn chỉnh sẽ nằm trong `frontend/out`.
+
+---
+
 ### Các đường dẫn truy cập:
-- 🎮 **Trang Bắt Đầu (Đăng ký Sinh viên)**: [http://localhost:3000](http://localhost:3000)
+- 🎮 **Trang Bắt Đầu (GitHub Pages)**: [https://lenguyenchuong544-dotcom.github.io/chu-tich-nuoc-game](https://lenguyenchuong544-dotcom.github.io/chu-tich-nuoc-game)
+- 🎮 **Trang Bắt Đầu (Local)**: [http://localhost:3000](http://localhost:3000)
 - 🏛 **Màn hình Trò chơi (Chủ tịch nước)**: [http://localhost:3000/game](http://localhost:3000/game)
 - 🏆 **Bảng Vinh Danh Toàn Lớp**: [http://localhost:3000/leaderboard](http://localhost:3000/leaderboard)
 - 👨‍🏫 **Bảng Quản Trị Giảng Viên (Admin)**: [http://localhost:3000/admin](http://localhost:3000/admin)
-- 📡 **API Backend & WebSocket**: [http://localhost:4000](http://localhost:4000)
+- 📡 **Ngrok Backend Public API**: [https://resurface-exert-reaffirm.ngrok-free.dev](https://resurface-exert-reaffirm.ngrok-free.dev)
+- 💻 **Backend Local API & WebSocket**: [http://localhost:4000](http://localhost:4000)

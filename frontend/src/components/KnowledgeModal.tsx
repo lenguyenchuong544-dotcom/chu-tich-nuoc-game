@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, XCircle, BookOpen, ArrowRight } from 'lucide-react';
+import { Check, X, BookOpen, ArrowRight } from 'lucide-react';
 import { sound } from '../lib/sound';
 import { Button } from './ui/Button';
 

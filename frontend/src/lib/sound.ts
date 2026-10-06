@@ -4,7 +4,6 @@
 
 class SoundManager {
   private audioCtx: AudioContext | null = null;
-  private bgmAudio: HTMLAudioElement | null = null;
   private victoryAudio: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
   private bgmStarted: boolean = false;
@@ -32,8 +31,12 @@ class SoundManager {
     }
   }
 
-  public playBGM() {
-    if (typeof window === 'undefined' || this.isMuted) return;
+  // Âm thanh khởi đầu game: Hợp âm ngũ cung trong trẻo, vui tươi, trang trọng (C5, E5, G5, A5, C6)
+  public playGameStart() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.audioCtx) return;
+
     try {
       if (!this.bgmAudio) {
         this.bgmAudio = new Audio('/audio/bgm.mp3');
@@ -45,25 +48,21 @@ class SoundManager {
       }).catch(() => {
         // Autoplay may be restricted until first user interaction
       });
-    } catch (e) {
-      console.warn('Cannot play BGM:', e);
-    }
+    } catch (e) {}
   }
 
-  public pauseBGM() {
-    if (this.bgmAudio) {
-      this.bgmAudio.pause();
-    }
-  }
+  public playBGM() {}
+
+  public pauseBGM() {}
 
   public playVictoryBGM() {
-    this.pauseBGM();
     if (typeof window === 'undefined' || this.isMuted) return;
     try {
       if (!this.victoryAudio) {
         this.victoryAudio = new Audio('/audio/victory.mp3');
         this.victoryAudio.volume = 0.4 * this.volume;
       }
+      this.victoryAudio.volume = 0.35 * this.volume;
       this.victoryAudio.currentTime = 0;
       this.victoryAudio.play().catch(() => {});
     } catch (e) {}
@@ -79,9 +78,6 @@ class SoundManager {
     }
     if (this.victoryAudio) {
       this.victoryAudio.muted = this.isMuted;
-    }
-    if (!this.isMuted && !this.bgmStarted) {
-      this.playBGM();
     }
     return this.isMuted;
   }
@@ -144,8 +140,10 @@ class SoundManager {
       gain.gain.setValueAtTime(0.2 * this.volume, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
 
-      osc.connect(gain);
-      gain.connect(this.audioCtx.destination);
+      osc1.connect(gain1);
+      gain1.connect(this.audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.12);
 
       osc.start(now);
       osc.stop(now + 0.09);
@@ -195,7 +193,7 @@ class SoundManager {
       notes.forEach((freq, idx) => {
         const osc = this.audioCtx!.createOscillator();
         const gain = this.audioCtx!.createGain();
-        const noteStart = now + idx * 0.08;
+        const noteStart = now + idx * 0.07;
 
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, noteStart);
