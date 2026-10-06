@@ -3,78 +3,97 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-cotton: #FFFDFE;
+    --color-blush: #FFE3EE;
+    --color-peony: #FF7FB0;
+    --color-sky: #CFE8FF;
+    --color-cornflower: #6FB4F2;
+    --color-ink: #2A2540;
+    --color-ink-muted: #5F5A75;
+    --color-correct: #10B981;
+    --color-wrong: #FF6B7F;
+    --color-highlight: #FFB84D;
+  }
+
   body {
-    @apply bg-[#080d1a] text-slate-100 antialiased selection:bg-amber-500/20 selection:text-amber-200;
+    @apply bg-cotton text-ink antialiased selection:bg-blush selection:text-peony-800 text-base;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    line-height: 1.65;
     overflow-x: hidden;
   }
 }
 
-/* Presidential Command Center Aesthetic (Refined, Cinematic, No Over-glow) */
-.command-center-bg {
-  background-color: #080d1a;
+/* Subtle Living Pastel Situation Room Background */
+.stationery-living-bg {
+  background-color: transparent;
   background-image: 
-    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
-    radial-gradient(circle at 80% 100%, rgba(30, 58, 138, 0.08) 0%, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(255, 227, 238, 0.45) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(207, 232, 255, 0.4) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(255, 240, 246, 0.45) 0px, transparent 55%),
+    radial-gradient(at 10% 80%, rgba(235, 245, 255, 0.35) 0px, transparent 40%);
+  background-attachment: fixed;
 }
 
-.gold-accent {
-  color: #d4af37;
+/* Stationery Grid Accent (Subtle Paper Note Texture) */
+.stationery-subtle-grid {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, rgba(42, 37, 64, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(42, 37, 64, 0.025) 1px, transparent 1px);
 }
 
-.border-command {
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Frosted Pastel Card Surface */
+.pastel-frosted-surface {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 227, 238, 0.85);
 }
 
-.border-command-gold {
-  border: 1px solid rgba(212, 175, 55, 0.25);
-}
-
-/* Decision Card Briefing Dossier Shadow */
-.briefing-card-shadow {
-  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.8),
-              0 0 0 1px rgba(212, 175, 55, 0.2);
-}
-
-.briefing-card-shadow:hover {
-  box-shadow: 0 20px 42px -10px rgba(0, 0, 0, 0.9),
-              0 0 0 1px rgba(212, 175, 55, 0.35);
-}
-
-/* Card Stack Layering */
-.card-stack-1 {
-  transform: translate3d(0, 6px, -10px) scale(0.97);
-  opacity: 0.65;
+/* Dossier Stack Visual Illusion */
+.card-stack-layer-1 {
+  transform: translate3d(0, 8px, -10px) scale(0.965);
+  opacity: 0.72;
   pointer-events: none;
 }
 
-.card-stack-2 {
-  transform: translate3d(0, 12px, -20px) scale(0.94);
-  opacity: 0.35;
+.card-stack-layer-2 {
+  transform: translate3d(0, 16px, -20px) scale(0.93);
+  opacity: 0.42;
   pointer-events: none;
 }
 
-/* Custom Scrollbar */
+/* Tactile Stamp Imprint Style */
+.stamp-imprint {
+  box-shadow: inset 0 0 0 2px currentColor;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  letter-spacing: 0.15em;
+  font-weight: 900;
+}
+
+/* Custom Soft Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #080d1a;
+  background: #FFFDFE;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #FFE3EE;
   border-radius: 9999px;
+  border: 1px solid #FFD4E5;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
+  background: #FF7FB0;
 }
 
-/* Subtle floating numbers */
+/* Floating Delta Feedback Animation */
 @keyframes deltaFloat {
   0% {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   20% {
     opacity: 1;
@@ -82,14 +101,134 @@
   }
   75% {
     opacity: 1;
-    transform: translateY(-16px);
+    transform: translateY(-12px);
   }
   100% {
     opacity: 0;
-    transform: translateY(-28px);
+    transform: translateY(-22px);
   }
 }
 
 .animate-delta-fade {
-  animation: deltaFloat 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: deltaFloat 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Educational Cartoon Background Decorative Animations */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes floatA {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(2deg);
+  }
+}
+
+@keyframes floatB {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-16px) rotate(-2.5deg);
+  }
+}
+
+@keyframes floatC {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg) scale(1.02);
+  }
+}
+
+@keyframes paperPlaneSway {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  30% {
+    transform: translate(6px, -14px) rotate(3deg);
+  }
+  70% {
+    transform: translate(-4px, -8px) rotate(-2deg);
+  }
+}
+
+@keyframes twinkleStar {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.85) rotate(0deg);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.2) rotate(15deg);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 8s ease-in-out infinite;
+}
+
+.animate-float-a {
+  animation: floatA 6s ease-in-out infinite;
+}
+
+.animate-float-b {
+  animation: floatB 7.5s ease-in-out infinite;
+}
+
+.animate-float-c {
+  animation: floatC 8.5s ease-in-out infinite;
+}
+
+.animate-paper-plane {
+  animation: paperPlaneSway 9s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkleStar 3.5s ease-in-out infinite;
+}
+
+.animate-twinkle-delay-1 {
+  animation: twinkleStar 4s ease-in-out 1.2s infinite;
+}
+
+.animate-twinkle-delay-2 {
+  animation: twinkleStar 4.5s ease-in-out 2.4s infinite;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-delta-fade,
+  .animate-pulse-glow,
+  .animate-float-a,
+  .animate-float-b,
+  .animate-float-c,
+  .animate-paper-plane,
+  .animate-twinkle,
+  .animate-twinkle-delay-1,
+  .animate-twinkle-delay-2 {
+    animation: none !important;
+    opacity: 0.3 !important;
+    transform: none !important;
+  }
+  .stationery-living-bg {
+    background-attachment: scroll;
+  }
 }

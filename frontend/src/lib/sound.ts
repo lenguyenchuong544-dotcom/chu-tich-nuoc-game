@@ -1,11 +1,27 @@
 // ============================================================================
-// HỆ THỐNG ÂM THANH: WEB AUDIO SYNTHESIZER & MP3 PLAYER
+// HỆ THỐNG ÂM THANH: PASTEL SITUATION ROOM WEB AUDIO SYNTHESIZER
+// Brighter, rounder timbres (sine & triangle, major-pentatonic phrases),
+// soft attack, short tails, gentle alert chimes, persistent mute & volume memory.
 // ============================================================================
 
 class SoundManager {
   private audioCtx: AudioContext | null = null;
   private victoryAudio: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
+  private volume: number = 0.5;
+
+  constructor() {
+    if (typeof window !== 'undefined') {
+      const savedMute = localStorage.getItem('president_sound_muted');
+      if (savedMute !== null) {
+        this.isMuted = savedMute === 'true';
+      }
+      const savedVol = localStorage.getItem('president_sound_volume');
+      if (savedVol !== null) {
+        this.volume = parseFloat(savedVol) || 0.5;
+      }
+    }
+  }
 
   private initContext() {
     if (typeof window === 'undefined') return;
@@ -20,7 +36,7 @@ class SoundManager {
     }
   }
 
-  // Âm thanh khởi đầu game: Nhẹ nhàng, trang trọng, đơn giản (Đã bỏ toàn bộ giọng thuyết minh)
+  // Âm thanh khởi đầu game: Hợp âm ngũ cung trong trẻo, vui tươi, trang trọng (C5, E5, G5, A5, C6)
   public playGameStart() {
     if (this.isMuted) return;
     this.initContext();
@@ -28,34 +44,30 @@ class SoundManager {
 
     try {
       const now = this.audioCtx.currentTime;
-      // Hợp âm vang nhẹ trang nghiêm (C4, G4, C5, E5)
-      const chord = [261.63, 392.0, 523.25, 659.25];
+      const notes = [523.25, 659.25, 783.99, 880.0, 1046.5]; // Pentatonic C Major
 
-      chord.forEach((freq, idx) => {
+      notes.forEach((freq, idx) => {
         const osc = this.audioCtx!.createOscillator();
         const gain = this.audioCtx!.createGain();
-        const startTime = now + idx * 0.06;
+        const startTime = now + idx * 0.05;
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, startTime);
 
         gain.gain.setValueAtTime(0.001, startTime);
-        gain.gain.linearRampToValueAtTime(0.12, startTime + 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.9);
+        gain.gain.linearRampToValueAtTime(0.14 * this.volume, startTime + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.6);
 
         osc.connect(gain);
         gain.connect(this.audioCtx!.destination);
 
         osc.start(startTime);
-        osc.stop(startTime + 0.95);
+        osc.stop(startTime + 0.65);
       });
     } catch (e) {}
   }
 
-  // Không phát giọng thuyết minh (Giữ trống hoặc chỉ hỗ trợ nhạc nền nhẹ nếu cần)
-  public playBGM() {
-    // Đã bỏ hoàn toàn giọng người dẫn truyện khi bắt đầu
-  }
+  public playBGM() {}
 
   public pauseBGM() {}
 
@@ -64,8 +76,8 @@ class SoundManager {
     try {
       if (!this.victoryAudio) {
         this.victoryAudio = new Audio('/audio/victory.mp3');
-        this.victoryAudio.volume = 0.4;
       }
+      this.victoryAudio.volume = 0.35 * this.volume;
       this.victoryAudio.currentTime = 0;
       this.victoryAudio.play().catch(() => {});
     } catch (e) {}
@@ -73,6 +85,9 @@ class SoundManager {
 
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('president_sound_muted', String(this.isMuted));
+    }
     if (this.victoryAudio) {
       this.victoryAudio.muted = this.isMuted;
     }
@@ -83,7 +98,21 @@ class SoundManager {
     return this.isMuted;
   }
 
-  // Tiếng vuốt thẻ sang trái / phải
+  public setVolume(val: number) {
+    this.volume = Math.max(0, Math.min(1, val));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('president_sound_volume', String(this.volume));
+    }
+    if (this.victoryAudio) {
+      this.victoryAudio.volume = 0.35 * this.volume;
+    }
+  }
+
+  public getVolume(): number {
+    return this.volume;
+  }
+
+  // Tiếng vuốt giấy nhẹ nhàng (Airy stationery paper swish)
   public playCardSwipe() {
     if (this.isMuted) return;
     this.initContext();
@@ -95,21 +124,21 @@ class SoundManager {
       const now = this.audioCtx.currentTime;
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.1);
 
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      gain.gain.setValueAtTime(0.12 * this.volume, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
 
       osc.connect(gain);
       gain.connect(this.audioCtx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.12);
+      osc.stop(now + 0.1);
     } catch (e) {}
   }
 
-  // Tiếng chọn quyết định (Gõ búa pháp đình / đóng dấu)
+  // Tiếng đóng dấu quyết định (Tactile rubber stamp imprint landing)
   public playDecisionClick() {
     if (this.isMuted) return;
     this.initContext();
@@ -117,25 +146,40 @@ class SoundManager {
 
     try {
       const now = this.audioCtx.currentTime;
-      const osc = this.audioCtx.createOscillator();
-      const gain = this.audioCtx.createGain();
 
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(180, now);
-      osc.frequency.exponentialRampToValueAtTime(45, now + 0.15);
+      // Resonant lower thud (Stamp impact)
+      const osc1 = this.audioCtx.createOscillator();
+      const gain1 = this.audioCtx.createGain();
+      osc1.type = 'triangle';
+      osc1.frequency.setValueAtTime(220, now);
+      osc1.frequency.exponentialRampToValueAtTime(60, now + 0.12);
 
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      gain1.gain.setValueAtTime(0.22 * this.volume, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
 
-      osc.connect(gain);
-      gain.connect(this.audioCtx.destination);
+      osc1.connect(gain1);
+      gain1.connect(this.audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.12);
 
-      osc.start(now);
-      osc.stop(now + 0.15);
+      // Crisper tactile papery snap
+      const osc2 = this.audioCtx.createOscillator();
+      const gain2 = this.audioCtx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(800, now);
+      osc2.frequency.exponentialRampToValueAtTime(320, now + 0.06);
+
+      gain2.gain.setValueAtTime(0.15 * this.volume, now);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+      osc2.connect(gain2);
+      gain2.connect(this.audioCtx.destination);
+      osc2.start(now);
+      osc2.stop(now + 0.06);
     } catch (e) {}
   }
 
-  // Tiếng trả lời đúng câu hỏi lý luận (+10 điểm)
+  // Tiếng trả lời đúng câu hỏi lý luận (Sparkling upward chime: C5 -> G5 -> C6)
   public playCorrect() {
     if (this.isMuted) return;
     this.initContext();
@@ -148,24 +192,24 @@ class SoundManager {
       notes.forEach((freq, idx) => {
         const osc = this.audioCtx!.createOscillator();
         const gain = this.audioCtx!.createGain();
-        const noteStart = now + idx * 0.08;
+        const noteStart = now + idx * 0.07;
 
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, noteStart);
 
-        gain.gain.setValueAtTime(0.18, noteStart);
-        gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.25);
+        gain.gain.setValueAtTime(0.15 * this.volume, noteStart);
+        gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.22);
 
         osc.connect(gain);
         gain.connect(this.audioCtx!.destination);
 
         osc.start(noteStart);
-        osc.stop(noteStart + 0.25);
+        osc.stop(noteStart + 0.22);
       });
     } catch (e) {}
   }
 
-  // Tiếng trả lời sai (-5 điểm)
+  // Tiếng trả lời chưa chính xác (Soft warm coral descending phrase)
   public playIncorrect() {
     if (this.isMuted) return;
     this.initContext();
@@ -178,24 +222,24 @@ class SoundManager {
       notes.forEach((freq, idx) => {
         const osc = this.audioCtx!.createOscillator();
         const gain = this.audioCtx!.createGain();
-        const noteStart = now + idx * 0.09;
+        const noteStart = now + idx * 0.08;
 
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(freq, noteStart);
 
-        gain.gain.setValueAtTime(0.15, noteStart);
-        gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.2);
+        gain.gain.setValueAtTime(0.12 * this.volume, noteStart);
+        gain.gain.exponentialRampToValueAtTime(0.001, noteStart + 0.18);
 
         osc.connect(gain);
         gain.connect(this.audioCtx!.destination);
 
         osc.start(noteStart);
-        osc.stop(noteStart + 0.2);
+        osc.stop(noteStart + 0.18);
       });
     } catch (e) {}
   }
 
-  // Tiếng còi báo động khủng hoảng khẩn cấp
+  // Tiếng cảnh báo khủng hoảng (Gentle double bell alert, not a siren)
   public playCrisis() {
     if (this.isMuted) return;
     this.initContext();
@@ -203,22 +247,26 @@ class SoundManager {
 
     try {
       const now = this.audioCtx.currentTime;
-      const osc = this.audioCtx.createOscillator();
-      const gain = this.audioCtx.createGain();
+      const bells = [659.25, 523.25]; // E5, C5
 
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(400, now);
-      osc.frequency.linearRampToValueAtTime(700, now + 0.2);
-      osc.frequency.linearRampToValueAtTime(400, now + 0.4);
+      bells.forEach((freq, idx) => {
+        const osc = this.audioCtx!.createOscillator();
+        const gain = this.audioCtx!.createGain();
+        const startTime = now + idx * 0.14;
 
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
 
-      osc.connect(gain);
-      gain.connect(this.audioCtx.destination);
+        gain.gain.setValueAtTime(0.001, startTime);
+        gain.gain.linearRampToValueAtTime(0.18 * this.volume, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
 
-      osc.start(now);
-      osc.stop(now + 0.45);
+        osc.connect(gain);
+        gain.connect(this.audioCtx!.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.38);
+      });
     } catch (e) {}
   }
 }

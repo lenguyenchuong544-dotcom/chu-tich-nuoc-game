@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, ArrowLeft, RefreshCw, Sparkles, BookOpen, Crown, Play } from 'lucide-react';
+import { Trophy, ArrowLeft, RefreshCw, Crown, Play, Award, CheckCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface LeaderboardItem {
   rank: number;
@@ -23,6 +24,9 @@ interface LeaderboardItem {
   rankTitle: string;
   endingTitle: string;
 }
+
+import { m } from 'framer-motion';
+import { springs } from '@/lib/motion';
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
@@ -58,24 +62,24 @@ export default function LeaderboardPage() {
   const top3 = leaderboard[2];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8 presidential-pattern">
+    <div className="min-h-screen stationery-living-bg text-ink p-4 sm:p-8">
       {/* Header */}
-      <header className="max-w-6xl mx-auto flex items-center justify-between pb-6 border-b border-amber-500/20">
+      <header className="max-w-7xl mx-auto flex items-center justify-between pb-6 border-b border-blush-border">
         <div className="flex items-center space-x-3">
           <Link
             href="/"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-400 transition-all"
+            className="p-2.5 rounded-2xl bg-white border border-blush-border hover:border-peony-400 text-ink-muted hover:text-ink transition-all shadow-xs"
             title="Về Trang Chủ"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-3 py-0.5 rounded-full bg-blush text-peony-700 border border-blush-border text-xs font-bold uppercase tracking-wider">
                 BẢNG VINH DANH LỚP HỌC
               </span>
             </div>
-            <h1 className="text-xl sm:text-3xl font-black uppercase tracking-wide text-slate-100 mt-0.5">
+            <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wide text-ink mt-0.5">
               BẢNG XẾP HẠNG NHIỆM KỲ NGUYÊN THỦ
             </h1>
           </div>
@@ -85,149 +89,175 @@ export default function LeaderboardPage() {
           <button
             onClick={fetchLeaderboard}
             disabled={isRefreshing}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-400 transition-all"
+            className="p-2.5 rounded-2xl bg-white border border-blush-border hover:border-peony-400 text-ink-muted hover:text-ink transition-all shadow-xs"
             title="Làm mới bảng xếp hạng"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
+            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin text-peony-600' : ''}`} />
           </button>
 
-          <Link
-            href="/game"
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95"
-          >
-            <Play className="w-3.5 h-3.5 fill-slate-950" />
-            <span>Vào Nhiệm Kỳ</span>
+          <Link href="/game">
+            <Button
+              variant="primary"
+              size="lg"
+              leftIcon={<Play className="w-5 h-5 fill-white" />}
+            >
+              Vào Nhiệm Kỳ
+            </Button>
           </Link>
         </div>
       </header>
 
-      {/* Top 3 Podium */}
-      {leaderboard.length >= 3 && (
-        <section className="max-w-4xl mx-auto my-8 grid grid-cols-3 gap-3 items-end">
-          {/* Top 2 - Silver */}
-          {top2 && (
-            <div className="flex flex-col items-center p-4 rounded-2xl bg-slate-900/90 border border-slate-400/40 shadow-xl text-center">
-              <span className="text-2xl mb-1">🥈</span>
-              <span className="text-[10px] uppercase font-bold text-slate-400">Hạng 2</span>
-              <h3 className="text-sm sm:text-base font-black text-slate-200 mt-1 truncate max-w-full">
-                {top2.name}
-              </h3>
-              <p className="text-xs text-slate-400 font-mono">{top2.studentId}</p>
-              <div className="mt-2 px-3 py-0.5 rounded-full bg-slate-800 text-slate-200 font-bold text-xs">
-                {top2.totalScore} Điểm
-              </div>
-            </div>
-          )}
+      {/* Bilateral Layout: Podium on Left, Full Table on Right */}
+      <div className="max-w-7xl mx-auto my-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Side: Top 3 Honor Podium & Class Insights */}
+        <div className="lg:col-span-4 xl:col-span-4 space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xs uppercase font-extrabold tracking-wider text-ink flex items-center gap-1.5">
+              <span>👑</span>
+              <span>BỤC VINH DANH XUẤT SẮC</span>
+            </h3>
+            <span className="text-xs text-ink-muted font-mono">{leaderboard.length} Sinh viên</span>
+          </div>
 
-          {/* Top 1 - Gold (Elevated) */}
+          {/* Top 1 - Quán Quân Spotlight */}
           {top1 && (
-            <div className="flex flex-col items-center p-6 rounded-3xl bg-slate-900/95 border-2 border-amber-400 shadow-2xl gold-glow text-center transform -translate-y-2">
-              <Crown className="w-8 h-8 text-yellow-300 mb-1 animate-bounce" />
-              <span className="text-3xl mb-1">🥇</span>
-              <span className="text-xs uppercase font-extrabold text-amber-300">QUÁN QUÂN NHIỆM KỲ</span>
-              <h3 className="text-base sm:text-xl font-black text-amber-400 mt-1 truncate max-w-full">
+            <div className="p-6 rounded-3xl bg-white border-4 border-highlight shadow-dossier text-center relative overflow-hidden">
+              <div className="absolute top-3 right-3 text-2xl">🥇</div>
+              <Crown className="w-10 h-10 text-highlight mx-auto mb-1 animate-bounce" />
+              <span className="text-xs uppercase font-black text-highlight-text tracking-wider bg-highlight-surface px-3 py-0.5 rounded-full border border-highlight">
+                QUÁN QUÂN NHIỆM KỲ
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-ink mt-2 truncate">
                 {top1.name}
-              </h3>
-              <p className="text-xs text-slate-300 font-mono">{top1.studentId}</p>
-              <div className="mt-2 px-4 py-1 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 font-black text-sm">
+              </h2>
+              <p className="text-xs sm:text-sm text-ink-muted font-mono font-medium">{top1.studentId}</p>
+              <div className="mt-3 px-5 py-2 rounded-2xl bg-highlight-surface border-2 border-highlight text-highlight-text font-black text-xl">
                 {top1.totalScore} Điểm
               </div>
-              <span className="text-[10px] text-yellow-200 font-semibold mt-1">
+              <span className="text-xs sm:text-sm text-ink-muted font-bold block mt-2">
                 {top1.rankTitle}
               </span>
             </div>
           )}
 
-          {/* Top 3 - Bronze */}
-          {top3 && (
-            <div className="flex flex-col items-center p-4 rounded-2xl bg-slate-900/90 border border-amber-700/50 shadow-xl text-center">
-              <span className="text-2xl mb-1">🥉</span>
-              <span className="text-[10px] uppercase font-bold text-amber-600">Hạng 3</span>
-              <h3 className="text-sm sm:text-base font-black text-slate-200 mt-1 truncate max-w-full">
-                {top3.name}
-              </h3>
-              <p className="text-xs text-slate-400 font-mono">{top3.studentId}</p>
-              <div className="mt-2 px-3 py-0.5 rounded-full bg-slate-800 text-slate-200 font-bold text-xs">
-                {top3.totalScore} Điểm
+          {/* Top 2 & Top 3 Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3.5">
+            {/* Top 2 */}
+            {top2 && (
+              <div className="p-4 sm:p-5 rounded-3xl bg-white border-2 border-sky-border shadow-pastel-blue text-left flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🥈</span>
+                    <span className="text-xs uppercase font-extrabold text-cornflower-700">Hạng 2 Toàn Khóa</span>
+                  </div>
+                  <h4 className="text-base font-black text-ink mt-1 truncate max-w-[170px]">
+                    {top2.name}
+                  </h4>
+                  <p className="text-xs text-ink-muted font-mono">{top2.studentId}</p>
+                </div>
+                <div className="px-3.5 py-1.5 rounded-2xl bg-sky-subtle text-cornflower-700 font-black text-base border border-sky-border">
+                  {top2.totalScore} Đ
+                </div>
               </div>
-            </div>
-          )}
-        </section>
-      )}
+            )}
 
-      {/* Full Leaderboard Table (1 - 60) */}
-      <main className="max-w-5xl mx-auto rounded-2xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden my-6">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] sm:text-xs tracking-wider border-b border-slate-800">
-              <tr>
-                <th className="py-3 px-4 text-center">Hạng</th>
-                <th className="py-3 px-4">Họ và Tên</th>
-                <th className="py-3 px-4">MSSV</th>
-                <th className="py-3 px-4 text-center">Tiến Độ</th>
-                <th className="py-3 px-4 text-center">Lý Luận</th>
-                <th className="py-3 px-4 text-center">Điểm Tổng Kết</th>
-                <th className="py-3 px-4">Xếp Loại Nhiệm Kỳ</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 font-medium">
-              {leaderboard.length === 0 ? (
+            {/* Top 3 */}
+            {top3 && (
+              <div className="p-4 sm:p-5 rounded-3xl bg-white border-2 border-blush-border shadow-pastel-card text-left flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🥉</span>
+                    <span className="text-xs uppercase font-extrabold text-peony-700">Hạng 3 Toàn Khóa</span>
+                  </div>
+                  <h4 className="text-base font-black text-ink mt-1 truncate max-w-[170px]">
+                    {top3.name}
+                  </h4>
+                  <p className="text-xs text-ink-muted font-mono">{top3.studentId}</p>
+                </div>
+                <div className="px-3.5 py-1.5 rounded-2xl bg-blush text-peony-700 font-black text-base border border-blush-border">
+                  {top3.totalScore} Đ
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Side: Full Leaderboard Table (1 - 60) */}
+        <main className="lg:col-span-8 xl:col-span-8 rounded-3xl bg-white border-2 border-blush-border shadow-dossier overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm sm:text-base">
+              <thead className="bg-blush-subtle text-ink-muted uppercase text-xs tracking-wider border-b border-blush-border">
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500 italic">
-                    Chưa có kết quả nào được ghi nhận. Hãy là người đầu tiên tham gia!
-                  </td>
+                  <th className="py-3.5 px-4 text-center">Hạng</th>
+                  <th className="py-3.5 px-4">Họ và Tên</th>
+                  <th className="py-3.5 px-4">MSSV</th>
+                  <th className="py-3.5 px-4 text-center">Tiến Độ</th>
+                  <th className="py-3.5 px-4 text-center">Lý Luận</th>
+                  <th className="py-3.5 px-4 text-center">Điểm Tổng</th>
+                  <th className="py-3.5 px-4">Xếp Loại Nhiệm Kỳ</th>
                 </tr>
-              ) : (
-                leaderboard.map((item) => (
-                  <tr
-                    key={item.id}
-                    className={`hover:bg-slate-800/40 transition-colors ${
-                      item.rank === 1
-                        ? 'bg-amber-500/10'
-                        : item.rank === 2
-                        ? 'bg-slate-300/5'
-                        : item.rank === 3
-                        ? 'bg-amber-700/5'
-                        : ''
-                    }`}
-                  >
-                    <td className="py-3 px-4 text-center font-bold">
-                      {item.rank === 1
-                        ? '🥇'
-                        : item.rank === 2
-                        ? '🥈'
-                        : item.rank === 3
-                        ? '🥉'
-                        : item.rank}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-100">{item.name}</td>
-                    <td className="py-3 px-4 text-slate-400 font-mono text-xs">{item.studentId}</td>
-                    <td className="py-3 px-4 text-center text-slate-300 font-mono">
-                      {item.turn}/{item.maxTurns} lượt
-                    </td>
-                    <td className="py-3 px-4 text-center font-bold text-cyan-400">
-                      {item.knowledgeScore}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-black text-sm border border-amber-500/30">
-                        {item.totalScore}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-300 text-xs">
-                      <span className="font-semibold">{item.rankTitle}</span>
-                      {item.endingTitle && (
-                        <span className="block text-[11px] text-slate-400 truncate max-w-xs italic">
-                          {item.endingTitle}
-                        </span>
-                      )}
+              </thead>
+              <tbody className="divide-y divide-blush-border/60 font-medium">
+                {leaderboard.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-8 text-center text-ink-muted italic text-sm">
+                      Chưa có kết quả nào được ghi nhận. Hãy là người đầu tiên tham gia!
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </main>
+                ) : (
+                  leaderboard.map((item) => (
+                    <m.tr
+                      layout
+                      transition={springs.scoreboardRow}
+                      key={item.id}
+                      className={`hover:bg-blush-subtle/60 transition-colors ${
+                        item.rank === 1
+                          ? 'bg-highlight-surface/40'
+                          : item.rank === 2
+                          ? 'bg-sky-subtle/40'
+                          : item.rank === 3
+                          ? 'bg-blush-subtle/40'
+                          : ''
+                      }`}
+                    >
+                      <td className="py-3.5 px-4 text-center font-black text-sm sm:text-base">
+                        {item.rank === 1
+                          ? '🥇'
+                          : item.rank === 2
+                          ? '🥈'
+                          : item.rank === 3
+                          ? '🥉'
+                          : item.rank}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-ink">{item.name}</td>
+                      <td className="py-3.5 px-4 text-ink-muted font-mono text-xs sm:text-sm">{item.studentId}</td>
+                      <td className="py-3.5 px-4 text-center text-ink font-mono text-sm sm:text-base">
+                        {item.turn}/{item.maxTurns} lượt
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-bold text-cornflower-700 text-sm sm:text-base">
+                        {item.knowledgeScore}
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        <span className="px-3 py-1 rounded-xl bg-blush text-peony-700 font-black text-sm sm:text-base border border-blush-border">
+                          {item.totalScore}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-ink">
+                        <span className="font-bold text-xs sm:text-sm block">{item.rankTitle}</span>
+                        {item.endingTitle && (
+                          <span className="block text-xs text-ink-muted truncate max-w-xs italic mt-0.5">
+                            {item.endingTitle}
+                          </span>
+                        )}
+                      </td>
+                    </m.tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

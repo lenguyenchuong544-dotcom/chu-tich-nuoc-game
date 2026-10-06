@@ -1,6 +1,9 @@
+'use client';
+
 import React from 'react';
 import { Check, X, BookOpen, ArrowRight } from 'lucide-react';
 import { sound } from '../lib/sound';
+import { Button } from './ui/Button';
 
 interface KnowledgeModalProps {
   isOpen: boolean;
@@ -20,57 +23,66 @@ export const KnowledgeModal: React.FC<KnowledgeModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md rounded-2xl bg-[#0f172a] border border-white/10 p-5 sm:p-6 shadow-2xl">
-        {/* Status Header */}
-        <div className="flex items-center space-x-3 mb-3">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/30 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="relative w-full max-w-lg rounded-3xl bg-white border-2 border-blush-border p-6 sm:p-7 shadow-dossier text-left">
+        {/* Status Badge & Header */}
+        <div className="flex items-center gap-4 mb-4">
           <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full border ${
+            className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-transform transform scale-100 shrink-0 ${
               isCorrect
-                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/40 text-rose-400'
+                ? 'bg-correct-surface border-correct text-correct-text shadow-sm'
+                : 'bg-wrong-surface border-wrong text-wrong-text shadow-sm'
             }`}
           >
-            {isCorrect ? <Check className="w-5 h-5 stroke-[2.5]" /> : <X className="w-5 h-5 stroke-[2.5]" />}
+            {isCorrect ? (
+              <Check className="w-7 h-7 stroke-[2.5]" />
+            ) : (
+              <X className="w-7 h-7 stroke-[2.5]" />
+            )}
           </div>
 
           <div>
             <h3
-              className={`text-base font-bold tracking-wide ${
-                isCorrect ? 'text-emerald-400' : 'text-rose-400'
+              className={`text-lg sm:text-xl font-black tracking-wide ${
+                isCorrect ? 'text-correct-text' : 'text-wrong-text'
               }`}
             >
-              {isCorrect ? '✓ LỰA CHỌN PHÙ HỢP' : '× CẦN XEM LẠI'}
+              {isCorrect ? '✓ PHƯƠNG ÁN PHÙ HỢP HIẾN ĐỊNH' : '× CẦN ĐIỀU CHỈNH LÝ LUẬN'}
             </h3>
-            <span className="text-xs text-slate-400 font-mono">
+            <span className="text-sm font-mono font-bold text-ink-muted">
               {isCorrect ? `+${knowledgeDelta} Điểm Lý Luận` : `${knowledgeDelta} Điểm Lý Luận`}
             </span>
           </div>
         </div>
 
-        {/* Theoretical Explanation */}
-        <div className="my-3 p-3.5 rounded-xl bg-black/40 border border-white/5 text-slate-200 text-xs sm:text-sm leading-relaxed">
-          <div className="flex items-center space-x-1.5 text-amber-400 text-[11px] font-bold uppercase tracking-wider mb-1.5">
-            <BookOpen className="w-3.5 h-3.5" />
+        {/* Theoretical Learning Note */}
+        <div className="my-4 p-4 sm:p-5 rounded-2xl bg-cotton border border-blush-border/80 text-ink text-sm sm:text-base leading-relaxed shadow-sm">
+          <div className="flex items-center gap-2 text-peony-700 text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-2.5">
+            <BookOpen className="w-4 h-4 text-peony-500 shrink-0" />
             <span>Căn Cứ Lý Luận (Chủ Nghĩa Xã Hội Khoa Học)</span>
           </div>
-          <p className="font-serif italic text-slate-300">
+          <p className="font-normal text-ink leading-relaxed">
             {explanation}
           </p>
         </div>
 
-        {/* CTA Button */}
-        <div className="mt-4 flex justify-end">
-          <button
+        {/* Action Button */}
+        <div className="mt-5 flex justify-end">
+          <Button
+            variant="primary"
+            size="lg"
             onClick={() => {
               sound.playDecisionClick();
               onContinue();
             }}
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md"
+            rightIcon={<ArrowRight className="w-5 h-5" />}
           >
-            <span>Tiếp Tục Nhiệm Kỳ</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+            Tiếp Tục Nhiệm Kỳ
+          </Button>
         </div>
       </div>
     </div>

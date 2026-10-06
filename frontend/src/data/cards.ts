@@ -73,7 +73,7 @@ export const CHARACTERS: Character[] = [
     "role": "Bộ trưởng Bộ Nội vụ & An ninh",
     "avatar": "security",
     "personality": "Kiên quyết giữ vững kỷ cương, trật tự xã hội và ổn định chính trị.",
-    "themeColor": "#ef4444"
+    "themeColor": "#FF6B7F"
   },
   {
     "id": "pham_quoc_viet",
@@ -2665,7 +2665,7 @@ export const GAME_ENDINGS: GameEnding[] = [
     subtitle: 'Chỉ số Chính trị chạm đáy (<= 0)',
     description: 'Bộ máy quản lý rơi vào tình trạng mất ổn định nghiêm trọng. Kỷ cương bị buông lỏng, các chủ trương điều hành bị phân hóa, trật tự an toàn quốc gia bị đe dọa nặng nề. Nhiệm kỳ bị gián đoạn.',
     badge: '⚠️ Thất Bại Điều Hành',
-    color: '#ef4444',
+    color: '#FF6B7F',
     conditionDescription: 'Chỉ số Chính trị <= 0'
   },
   {
@@ -2674,7 +2674,7 @@ export const GAME_ENDINGS: GameEnding[] = [
     subtitle: 'Chỉ số Kinh tế chạm đáy (<= 0)',
     description: 'Nền kinh tế rơi vào suy thoái trầm trọng, ngân sách cạn kiệt. Nhà nước không còn đủ nguồn lực tài chính để thực thi các chính sách an sinh xã hội, tiền tệ mất giá, đời sống gặp bế tắc.',
     badge: '⚠️ Thất Bại Kinh Tế',
-    color: '#ef4444',
+    color: '#FF6B7F',
     conditionDescription: 'Chỉ số Kinh tế <= 0'
   },
   {
@@ -2683,7 +2683,7 @@ export const GAME_ENDINGS: GameEnding[] = [
     subtitle: 'Chỉ số Niềm tin Nhân dân chạm đáy (<= 0)',
     description: 'Niềm tin của quần chúng nhân dân suy giảm nghiêm trọng do các quyết định xa rời thực tiễn, quan liêu và bỏ quên tiếng nói của người lao động. Chế độ mất đi điểm tựa vững chắc nhất là lòng dân.',
     badge: '⚠️ Mất Điểm Tựa Nhân Dân',
-    color: '#ef4444',
+    color: '#FF6B7F',
     conditionDescription: 'Chỉ số Nhân dân <= 0'
   },
   {
@@ -2692,7 +2692,7 @@ export const GAME_ENDINGS: GameEnding[] = [
     subtitle: 'Chỉ số Pháp quyền chạm đáy (<= 0)',
     description: 'Các nguyên tắc pháp quyền bị suy yếu hoàn toàn. Hoạt động quản lý mất đi khuôn khổ pháp lý cần thiết, vi hiến và tùy tiện lan rộng, công lý bị xâm phạm, xã hội rơi vào hỗn loạn.',
     badge: '⚠️ Thể Chế Suy Thoái',
-    color: '#ef4444',
+    color: '#FF6B7F',
     conditionDescription: 'Chỉ số Pháp quyền <= 0'
   }
 ];
