@@ -1,7 +1,11 @@
+'use client';
+
 import React from 'react';
 import { GAME_ENDINGS, GameEnding } from '../data/cards';
-import { Skull, RotateCcw, Trophy, BookOpen } from 'lucide-react';
+import { RotateCcw, Trophy, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
+import { Button } from './ui/Button';
+import { Badge } from './ui/Badge';
 
 interface GameOverModalProps {
   isOpen: boolean;
@@ -30,75 +34,121 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   const ending: GameEnding =
     GAME_ENDINGS.find((e) => e.id === endingId) || {
       id: 'ENDING_CRISIS_GENERIC',
-      title: 'GAME OVER: NHIỆM KỲ BỊ GIÁN ĐOẠN',
+      title: 'KHỦNG HOẢNG THỂ CHẾ TRỌNG YẾU',
       subtitle: 'Đất nước mất cân bằng nghiêm trọng',
-      description: 'Một trong các chỉ số quốc gia trọng yếu đã suy giảm về 0, khiến bộ máy nhà nước không thể tiếp tục vận hành bình thường.',
-      badge: '⚠️ Thất Bại Điều Hành',
-      color: '#ef4444',
+      description: 'Một trong các trụ cột quốc gia trọng yếu đã suy giảm về 0, khiến bộ máy nhà nước không thể tiếp tục vận hành.',
+      badge: '⚠️ Kết Thúc Nhiệm Kỳ',
+      color: '#FF6B7F',
       conditionDescription: 'Chỉ số chạm đáy 0',
     };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-lg animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-rose-500/50 p-6 sm:p-7 shadow-2xl text-center overflow-hidden">
-        {/* Top Warning bar */}
-        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-600 via-red-500 to-rose-600" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/30 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg rounded-2xl bg-cotton border-2 border-wrong/60 p-6 sm:p-7 shadow-dossier-crisis text-center overflow-hidden text-ink">
+        {/* Top Warm Coral Bar */}
+        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-wrong via-peony to-wrong" />
 
-        {/* Icon & Badge */}
-        <div className="flex justify-center mb-4">
-          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/10 border-2 border-rose-500 text-rose-500 animate-pulse">
-            <Skull className="w-8 h-8" />
+        {/* Warning Icon Badge */}
+        <div className="flex justify-center mb-3 mt-1">
+          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-wrong-surface border-2 border-wrong text-wrong-text shadow-sm">
+            <AlertTriangle className="w-7 h-7" />
           </div>
         </div>
 
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 mb-2">
-          {ending.badge}
-        </span>
+        <div className="mb-2">
+          <Badge variant="coral" size="md">
+            {ending.badge}
+          </Badge>
+        </div>
 
-        <h2 className="text-xl sm:text-2xl font-black text-rose-400 tracking-wide uppercase mt-1">
-          {ending.title}
+        <h2 className="text-xl sm:text-2xl font-black text-ink tracking-wide uppercase mt-1">
+          NHIỆM KỲ KẾT THÚC
         </h2>
-        <p className="text-xs sm:text-sm text-slate-400 font-medium italic mt-1">
-          {ending.subtitle}
+        <p className="text-xs sm:text-sm text-wrong-text font-bold uppercase tracking-wide mt-1">
+          {ending.title}
         </p>
 
-        {/* Ending Narrative Description */}
-        <div className="my-4 p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-300 text-xs sm:text-sm leading-relaxed text-left font-serif">
-          {ending.description}
+        {/* Cause of Failure Narrative */}
+        <div className="my-4 p-4 rounded-xl bg-wrong-surface/60 border border-wrong/30 text-ink text-xs sm:text-sm leading-relaxed text-left font-sans">
+          <p className="text-wrong-text text-[11px] uppercase tracking-wider font-bold mb-1">
+            Nguyên nhân biến động:
+          </p>
+          <p className="italic text-ink/90">
+            {ending.description}
+          </p>
         </div>
 
-        {/* Summary Stats Grid */}
-        <div className="grid grid-cols-2 gap-2 my-4 text-xs font-semibold">
-          <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 flex flex-col items-center">
-            <span className="text-slate-400 text-[11px]">LƯỢT ĐÃ TRỤ VỮNG</span>
-            <span className="text-base font-bold text-amber-400 mt-0.5">{turnsSurvived} Lượt</span>
+        {/* Performance Summary (2 columns) */}
+        <div className="grid grid-cols-2 gap-3 my-3">
+          <div className="p-3 rounded-xl bg-cotton border-2 border-blush-deep/60 text-center shadow-tactile">
+            <span className="text-[10px] text-ink-muted uppercase tracking-wider font-bold block">
+              SỐ QUYẾT ĐỊNH ĐÃ RA
+            </span>
+            <span className="text-lg font-bold font-mono tabular-nums text-peony-700 mt-0.5 block">
+              {turnsSurvived} / 30
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 flex flex-col items-center">
-            <span className="text-slate-400 text-[11px] flex items-center space-x-1">
-              <BookOpen className="w-3 h-3 text-cyan-400" />
-              <span>ĐIỂM KIẾN THỨC</span>
+          <div className="p-3 rounded-xl bg-cotton border-2 border-sky-deep/60 text-center shadow-tactile">
+            <span className="text-[10px] text-ink-muted uppercase tracking-wider font-bold block">
+              ĐIỂM LÝ LUẬN
             </span>
-            <span className="text-base font-bold text-cyan-400 mt-0.5">{knowledgeScore} Điểm</span>
+            <span className="text-lg font-bold font-mono tabular-nums text-cornflower-700 mt-0.5 block">
+              {knowledgeScore} Điểm
+            </span>
+          </div>
+        </div>
+
+        {/* Final 4 Pillars Status */}
+        <div className="p-2.5 rounded-xl bg-blush-surface border border-blush-deep flex items-center justify-around text-xs my-3">
+          <div className="text-center">
+            <span className="text-[10px] text-ink-muted block font-semibold">Chính Trị</span>
+            <span className={`font-mono font-bold ${stats.politics <= 0 ? 'text-wrong-text font-black' : 'text-ink'}`}>
+              {Math.round(stats.politics)}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-blush-deep" />
+          <div className="text-center">
+            <span className="text-[10px] text-ink-muted block font-semibold">Kinh Tế</span>
+            <span className={`font-mono font-bold ${stats.economy <= 0 ? 'text-wrong-text font-black' : 'text-ink'}`}>
+              {Math.round(stats.economy)}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-blush-deep" />
+          <div className="text-center">
+            <span className="text-[10px] text-ink-muted block font-semibold">Nhân Dân</span>
+            <span className={`font-mono font-bold ${stats.people <= 0 ? 'text-wrong-text font-black' : 'text-ink'}`}>
+              {Math.round(stats.people)}
+            </span>
+          </div>
+          <div className="h-4 w-px bg-blush-deep" />
+          <div className="text-center">
+            <span className="text-[10px] text-ink-muted block font-semibold">Pháp Quyền</span>
+            <span className={`font-mono font-bold ${stats.law <= 0 ? 'text-wrong-text font-black' : 'text-ink'}`}>
+              {Math.round(stats.law)}
+            </span>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3 mt-5">
-          <button
+          <Button
+            variant="primary"
             onClick={onRestart}
-            className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm tracking-wide transition-all shadow-lg active:scale-95"
+            className="w-full"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Chơi Lại Nhiệm Kỳ</span>
-          </button>
+            <span>Thực Hiện Lại</span>
+          </Button>
 
-          <Link
-            href="/leaderboard"
-            className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs sm:text-sm tracking-wide transition-all active:scale-95"
-          >
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <span>Bảng Xếp Hạng</span>
+          <Link href="/leaderboard" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+            >
+              <Trophy className="w-4 h-4 text-peony" />
+              <span>Bảng Vinh Danh</span>
+            </Button>
           </Link>
         </div>
       </div>

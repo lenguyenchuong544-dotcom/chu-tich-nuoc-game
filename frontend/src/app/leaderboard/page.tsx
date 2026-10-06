@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, ArrowLeft, RefreshCw, Sparkles, BookOpen, Crown, Play } from 'lucide-react';
+import { ArrowLeft, Trophy, Crown, RefreshCw, Search, Play } from 'lucide-react';
+import io from 'socket.io-client';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 interface LeaderboardItem {
   rank: number;
@@ -19,135 +24,159 @@ interface LeaderboardItem {
   };
   knowledgeScore: number;
   totalScore: number;
-  status: 'PLAYING' | 'GAMEOVER' | 'COMPLETED';
   rankTitle: string;
-  endingTitle: string;
+  endingTitle?: string;
+  lastActiveAt: number;
 }
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [currentStudentId, setCurrentStudentId] = useState<string>('');
+
+  useEffect(() => {
+    const savedId = localStorage.getItem('president_student_id') || '';
+    setCurrentStudentId(savedId);
+
+    fetchLeaderboard();
+
+    // Connect to WebSocket for realtime ranking telemetry
+    let socket: any = null;
+    try {
+      socket = io(API_BASE, { transports: ['websocket', 'polling'] });
+      socket.on('leaderboardUpdate', (data: LeaderboardItem[]) => {
+        if (Array.isArray(data)) {
+          setLeaderboard(data);
+          setLoading(false);
+        }
+      });
+    } catch (e) {
+      console.warn('Socket connect failed, falling back to HTTP');
+    }
+
+    return () => {
+      if (socket) socket.disconnect();
+    };
+  }, []);
 
   const fetchLeaderboard = async () => {
-    setIsRefreshing(true);
+    setLoading(true);
     try {
-      const res = await fetch('http://localhost:4000/api/player/leaderboard?limit=60');
+      const res = await fetch(`${API_BASE}/api/player/leaderboard?limit=60`);
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.leaderboard) {
+        if (data.success && Array.isArray(data.leaderboard)) {
           setLeaderboard(data.leaderboard);
         }
       }
     } catch (e) {
-      console.warn('Backend offline');
+      console.warn('Cannot fetch leaderboard HTTP');
     } finally {
       setLoading(false);
-      setIsRefreshing(false);
     }
   };
 
-  useEffect(() => {
-    fetchLeaderboard();
-    const interval = setInterval(fetchLeaderboard, 4000);
-    return () => clearInterval(interval);
-  }, []);
+  const filteredList = leaderboard.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.studentId.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   const top1 = leaderboard[0];
   const top2 = leaderboard[1];
   const top3 = leaderboard[2];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8 presidential-pattern">
-      {/* Header */}
-      <header className="max-w-6xl mx-auto flex items-center justify-between pb-6 border-b border-amber-500/20">
+    <div className="min-h-screen living-pastel-bg text-ink p-3 sm:p-6">
+      {/* Top Header */}
+      <header className="max-w-5xl mx-auto flex items-center justify-between py-3 border-b border-blush-deep/60">
         <div className="flex items-center space-x-3">
-          <Link
-            href="/"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-400 transition-all"
-            title="Về Trang Chủ"
-          >
-            <ArrowLeft className="w-5 h-5" />
+          <Link href="/">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 text-peony-700" />
+            </Button>
           </Link>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider">
-                BẢNG VINH DANH LỚP HỌC
-              </span>
+              <Badge variant="blush" size="sm">
+                BẢNG VINH DANH QUỐC GIA
+              </Badge>
             </div>
-            <h1 className="text-xl sm:text-3xl font-black uppercase tracking-wide text-slate-100 mt-0.5">
-              BẢNG XẾP HẠNG NHIỆM KỲ NGUYÊN THỦ
+            <h1 className="text-base sm:text-xl font-black uppercase tracking-tight text-ink mt-0.5">
+              KẾT QUẢ ĐIỀU HÀNH NHIỆM KỲ
             </h1>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <button
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={fetchLeaderboard}
-            disabled={isRefreshing}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-400 transition-all"
-            title="Làm mới bảng xếp hạng"
+            title="Làm mới dữ liệu"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-amber-400' : ''}`} />
-          </button>
+            <RefreshCw className={`w-4 h-4 text-peony-700 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
 
-          <Link
-            href="/game"
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-lg active:scale-95"
-          >
-            <Play className="w-3.5 h-3.5 fill-slate-950" />
-            <span>Vào Nhiệm Kỳ</span>
+          <Link href="/game">
+            <Button variant="primary" size="sm">
+              <Play className="w-3.5 h-3.5 fill-white" />
+              <span>Vào Nhiệm Kỳ</span>
+            </Button>
           </Link>
         </div>
       </header>
 
-      {/* Top 3 Podium */}
-      {leaderboard.length >= 3 && (
-        <section className="max-w-4xl mx-auto my-8 grid grid-cols-3 gap-3 items-end">
+      {/* Podium Top 3 (🥈 🥇 🥉) in Soft Pastel Cards */}
+      {leaderboard.length >= 3 && !searchTerm && (
+        <section className="max-w-3xl mx-auto my-6 sm:my-8 grid grid-cols-3 gap-2.5 sm:gap-4 items-end">
           {/* Top 2 - Silver */}
           {top2 && (
-            <div className="flex flex-col items-center p-4 rounded-2xl bg-slate-900/90 border border-slate-400/40 shadow-xl text-center">
-              <span className="text-2xl mb-1">🥈</span>
-              <span className="text-[10px] uppercase font-bold text-slate-400">Hạng 2</span>
-              <h3 className="text-sm sm:text-base font-black text-slate-200 mt-1 truncate max-w-full">
+            <div className="flex flex-col items-center p-3 sm:p-4 rounded-2xl bg-cotton border-2 border-sky-deep shadow-tactile text-center order-1">
+              <span className="text-xl sm:text-2xl mb-1">🥈</span>
+              <span className="text-[10px] uppercase font-bold text-cornflower-700">HẠNG 2</span>
+              <h3 className="text-xs sm:text-sm font-bold text-ink mt-0.5 line-clamp-2 leading-tight max-w-full text-center min-h-[2rem] flex items-center justify-center">
                 {top2.name}
               </h3>
-              <p className="text-xs text-slate-400 font-mono">{top2.studentId}</p>
-              <div className="mt-2 px-3 py-0.5 rounded-full bg-slate-800 text-slate-200 font-bold text-xs">
+              <p className="text-[10px] text-ink-muted font-mono">{top2.studentId}</p>
+              <div className="mt-2 px-3 py-0.5 rounded-pill bg-sky-surface text-cornflower-700 font-bold text-xs font-mono tabular-nums border border-sky-deep">
                 {top2.totalScore} Điểm
               </div>
             </div>
           )}
 
-          {/* Top 1 - Gold (Elevated) */}
+          {/* Top 1 - Gold Honey (Elevated in Center) */}
           {top1 && (
-            <div className="flex flex-col items-center p-6 rounded-3xl bg-slate-900/95 border-2 border-amber-400 shadow-2xl gold-glow text-center transform -translate-y-2">
-              <Crown className="w-8 h-8 text-yellow-300 mb-1 animate-bounce" />
-              <span className="text-3xl mb-1">🥇</span>
-              <span className="text-xs uppercase font-extrabold text-amber-300">QUÁN QUÂN NHIỆM KỲ</span>
-              <h3 className="text-base sm:text-xl font-black text-amber-400 mt-1 truncate max-w-full">
+            <div className="flex flex-col items-center p-3 sm:p-5 rounded-2xl bg-highlight-surface border-2 border-highlight shadow-dossier text-center order-2 transform -translate-y-2 relative">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <Crown className="w-6 h-6 text-highlight-text animate-bounce" />
+              </div>
+              <span className="text-2xl sm:text-3xl mb-0.5 mt-1">🥇</span>
+              <span className="text-[10px] uppercase font-black tracking-wider text-highlight-text">QUÁN QUÂN</span>
+              <h3 className="text-xs sm:text-base font-extrabold text-ink mt-0.5 line-clamp-2 leading-tight max-w-full text-center min-h-[2rem] flex items-center justify-center">
                 {top1.name}
               </h3>
-              <p className="text-xs text-slate-300 font-mono">{top1.studentId}</p>
-              <div className="mt-2 px-4 py-1 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 font-black text-sm">
+              <p className="text-[10px] text-ink-muted font-mono">{top1.studentId}</p>
+              <div className="mt-2 px-3 py-1 rounded-pill bg-cotton border-2 border-highlight text-highlight-text font-black text-xs sm:text-sm font-mono tabular-nums shadow-sm">
                 {top1.totalScore} Điểm
               </div>
-              <span className="text-[10px] text-yellow-200 font-semibold mt-1">
+              <span className="text-[9px] sm:text-[10px] text-highlight-text font-semibold mt-1 line-clamp-2 text-center max-w-full leading-tight">
                 {top1.rankTitle}
               </span>
             </div>
           )}
 
-          {/* Top 3 - Bronze */}
+          {/* Top 3 - Bronze Blush */}
           {top3 && (
-            <div className="flex flex-col items-center p-4 rounded-2xl bg-slate-900/90 border border-amber-700/50 shadow-xl text-center">
-              <span className="text-2xl mb-1">🥉</span>
-              <span className="text-[10px] uppercase font-bold text-amber-600">Hạng 3</span>
-              <h3 className="text-sm sm:text-base font-black text-slate-200 mt-1 truncate max-w-full">
+            <div className="flex flex-col items-center p-3 sm:p-4 rounded-2xl bg-cotton border-2 border-blush-deep shadow-tactile text-center order-3">
+              <span className="text-xl sm:text-2xl mb-1">🥉</span>
+              <span className="text-[10px] uppercase font-bold text-peony-700">HẠNG 3</span>
+              <h3 className="text-xs sm:text-sm font-bold text-ink mt-0.5 line-clamp-2 leading-tight max-w-full text-center min-h-[2rem] flex items-center justify-center">
                 {top3.name}
               </h3>
-              <p className="text-xs text-slate-400 font-mono">{top3.studentId}</p>
-              <div className="mt-2 px-3 py-0.5 rounded-full bg-slate-800 text-slate-200 font-bold text-xs">
+              <p className="text-[10px] text-ink-muted font-mono">{top3.studentId}</p>
+              <div className="mt-2 px-3 py-0.5 rounded-pill bg-blush-surface text-peony-700 font-bold text-xs font-mono tabular-nums border border-blush-deep">
                 {top3.totalScore} Điểm
               </div>
             </div>
@@ -155,74 +184,96 @@ export default function LeaderboardPage() {
         </section>
       )}
 
-      {/* Full Leaderboard Table (1 - 60) */}
-      <main className="max-w-5xl mx-auto rounded-2xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden my-6">
+      {/* Main Ranking Table */}
+      <main className="max-w-5xl mx-auto rounded-2xl bg-cotton border-2 border-blush-deep shadow-dossier overflow-hidden my-4">
+        {/* Search Bar */}
+        <div className="p-3 border-b border-blush-deep/60 flex items-center justify-between gap-3 bg-blush-surface/40">
+          <div className="relative flex-1 max-w-xs">
+            <Search className="w-3.5 h-3.5 text-ink-muted absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm theo tên hoặc MSSV..."
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-cotton border-2 border-blush-deep text-xs text-ink placeholder:text-ink-subtle focus:border-peony outline-none transition-all"
+            />
+          </div>
+          <span className="text-[11px] text-ink-muted">
+            Tổng cộng: <strong className="text-ink">{filteredList.length}</strong> sinh viên
+          </span>
+        </div>
+
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] sm:text-xs tracking-wider border-b border-slate-800">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-blush-surface text-ink-muted uppercase text-[10px] tracking-wider border-b border-blush-deep font-bold">
               <tr>
-                <th className="py-3 px-4 text-center">Hạng</th>
-                <th className="py-3 px-4">Họ và Tên</th>
-                <th className="py-3 px-4">MSSV</th>
-                <th className="py-3 px-4 text-center">Tiến Độ</th>
-                <th className="py-3 px-4 text-center">Lý Luận</th>
-                <th className="py-3 px-4 text-center">Điểm Tổng Kết</th>
-                <th className="py-3 px-4">Xếp Loại Nhiệm Kỳ</th>
+                <th className="py-2.5 px-3 text-center w-12">Hạng</th>
+                <th className="py-2.5 px-3">Họ và Tên</th>
+                <th className="py-2.5 px-3">MSSV</th>
+                <th className="py-2.5 px-3 text-center">Nhiệm Kỳ</th>
+                <th className="py-2.5 px-3 text-center">Lý Luận</th>
+                <th className="py-2.5 px-3 text-center">Tổng Điểm</th>
+                <th className="py-2.5 px-3">Xếp Loại Danh Dự</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800 font-medium">
-              {leaderboard.length === 0 ? (
+            <tbody className="divide-y divide-blush-deep/40 font-medium text-ink">
+              {filteredList.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-slate-500 italic">
-                    Chưa có kết quả nào được ghi nhận. Hãy là người đầu tiên tham gia!
+                  <td colSpan={7} className="py-8 text-center text-ink-muted italic">
+                    {loading ? 'Đang cập nhật bảng vinh danh...' : 'Chưa có kết quả nào phù hợp.'}
                   </td>
                 </tr>
               ) : (
-                leaderboard.map((item) => (
-                  <tr
-                    key={item.id}
-                    className={`hover:bg-slate-800/40 transition-colors ${
-                      item.rank === 1
-                        ? 'bg-amber-500/10'
-                        : item.rank === 2
-                        ? 'bg-slate-300/5'
-                        : item.rank === 3
-                        ? 'bg-amber-700/5'
-                        : ''
-                    }`}
-                  >
-                    <td className="py-3 px-4 text-center font-bold">
-                      {item.rank === 1
-                        ? '🥇'
-                        : item.rank === 2
-                        ? '🥈'
-                        : item.rank === 3
-                        ? '🥉'
-                        : item.rank}
-                    </td>
-                    <td className="py-3 px-4 font-bold text-slate-100">{item.name}</td>
-                    <td className="py-3 px-4 text-slate-400 font-mono text-xs">{item.studentId}</td>
-                    <td className="py-3 px-4 text-center text-slate-300 font-mono">
-                      {item.turn}/{item.maxTurns} lượt
-                    </td>
-                    <td className="py-3 px-4 text-center font-bold text-cyan-400">
-                      {item.knowledgeScore}
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-black text-sm border border-amber-500/30">
-                        {item.totalScore}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-slate-300 text-xs">
-                      <span className="font-semibold">{item.rankTitle}</span>
-                      {item.endingTitle && (
-                        <span className="block text-[11px] text-slate-400 truncate max-w-xs italic">
-                          {item.endingTitle}
+                filteredList.map((item) => {
+                  const isCurrent = currentStudentId && item.studentId.toLowerCase() === currentStudentId.toLowerCase();
+
+                  return (
+                    <tr
+                      key={item.id}
+                      className={`hover:bg-blush-surface/60 transition-colors ${
+                        isCurrent
+                          ? 'bg-blush-surface ring-2 ring-peony'
+                          : item.rank === 1
+                          ? 'bg-highlight-surface/50'
+                          : ''
+                      }`}
+                    >
+                      <td className="py-2.5 px-3 text-center font-bold">
+                        {item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank}
+                      </td>
+                      <td className="py-2.5 px-3 font-bold text-ink">
+                        <div className="flex items-center space-x-1.5">
+                          <span>{item.name}</span>
+                          {isCurrent && (
+                            <span className="px-1.5 py-0.5 rounded-pill text-[9px] font-black uppercase bg-peony text-white flex-shrink-0">
+                              BẠN
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3 text-ink-muted font-mono text-[11px]">{item.studentId}</td>
+                      <td className="py-2.5 px-3 text-center text-ink font-mono tabular-nums whitespace-nowrap">
+                        {item.turn}/{item.maxTurns} lượt
+                      </td>
+                      <td className="py-2.5 px-3 text-center font-bold text-cornflower-700 font-mono tabular-nums">
+                        {item.knowledgeScore}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <span className="px-2.5 py-0.5 rounded-pill bg-blush-surface text-peony-700 font-black text-xs font-mono tabular-nums border border-blush-deep">
+                          {item.totalScore}
                         </span>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-2.5 px-3 text-ink text-[11px]">
+                        <span className="font-semibold block">{item.rankTitle}</span>
+                        {item.endingTitle && (
+                          <span className="text-[10px] text-ink-muted italic block truncate max-w-xs">
+                            {item.endingTitle}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

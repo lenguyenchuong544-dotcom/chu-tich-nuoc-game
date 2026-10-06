@@ -1,5 +1,6 @@
 @echo off
 chcp 65001 >nul
+set "PATH=C:\Program Files\nodejs;%APPDATA%\npm;%PATH%"
 echo =========================================================================
 echo   🏛  CHỦ TỊCH NƯỚC - VẬN MỆNH QUỐC GIA - KHỞI ĐỘNG HỆ THỐNG FULLSTACK  🏛
 echo =========================================================================

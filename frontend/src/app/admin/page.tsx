@@ -15,9 +15,14 @@ import {
   Search,
   Filter,
   BarChart3,
-  ShieldAlert,
-  Flame,
+  ArrowUpDown,
+  Tv,
 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Toggle } from '@/components/ui/Toggle';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 interface PlayerRow {
   rank: number;
@@ -62,11 +67,13 @@ export default function AdminPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [sortBy, setSortBy] = useState<'SCORE' | 'TURN' | 'KNOWLEDGE' | 'NAME'>('SCORE');
+  const [isProjectorMode, setIsProjectorMode] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
 
   const fetchAdminData = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/admin/players');
+      const res = await fetch(`${API_BASE}/api/admin/players`);
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
@@ -87,8 +94,14 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('projector') === 'true' || params.get('projector') === '1') {
+        setIsProjectorMode(true);
+      }
+    }
     fetchAdminData();
-    const interval = setInterval(fetchAdminData, 3000); // Polling every 3s
+    const interval = setInterval(fetchAdminData, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -97,7 +110,7 @@ export default function AdminPage() {
       return;
     }
     try {
-      const res = await fetch('http://localhost:4000/api/admin/reset', { method: 'POST' });
+      const res = await fetch(`${API_BASE}/api/admin/reset`, { method: 'POST' });
       const data = await res.json();
       setMessage(data.message || 'Đã làm mới phiên thi.');
       fetchAdminData();
@@ -109,7 +122,7 @@ export default function AdminPage() {
 
   const handleGenerateDemo = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/admin/generate-demo-class', { method: 'POST' });
+      const res = await fetch(`${API_BASE}/api/admin/generate-demo-class`, { method: 'POST' });
       const data = await res.json();
       setMessage(data.message || 'Đã tạo 60 sinh viên demo.');
       fetchAdminData();
@@ -119,357 +132,376 @@ export default function AdminPage() {
     setTimeout(() => setMessage(''), 4000);
   };
 
-  const filteredPlayers = players.filter((p) => {
-    const matchesSearch =
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.studentId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'ALL' ||
-      (statusFilter === 'PLAYING' && p.status === 'PLAYING') ||
-      (statusFilter === 'COMPLETED' && p.status === 'COMPLETED') ||
-      (statusFilter === 'GAMEOVER' && p.status === 'GAMEOVER');
-    return matchesSearch && matchesStatus;
-  });
+  // Filter & Sort
+  const processedPlayers = players
+    .filter((p) => {
+      const matchesSearch =
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.studentId.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === 'ALL' ||
+        (statusFilter === 'PLAYING' && p.status === 'PLAYING') ||
+        (statusFilter === 'COMPLETED' && p.status === 'COMPLETED') ||
+        (statusFilter === 'GAMEOVER' && p.status === 'GAMEOVER');
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'SCORE') return b.totalScore - a.totalScore;
+      if (sortBy === 'TURN') return b.turn - a.turn;
+      if (sortBy === 'KNOWLEDGE') return b.knowledgeScore - a.knowledgeScore;
+      if (sortBy === 'NAME') return a.name.localeCompare(b.name, 'vi');
+      return 0;
+    });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 sm:p-8 presidential-pattern">
-      {/* Top Header */}
-      <header className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-amber-500/20">
+    <div className={`min-h-screen living-pastel-bg text-ink p-3 sm:p-6 transition-all ${isProjectorMode ? 'p-6 sm:p-10' : ''}`}>
+      {/* Header - Classroom Mission Control */}
+      <header className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-blush-deep/60">
         <div className="flex items-center space-x-3">
-          <Link
-            href="/"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-amber-500 text-slate-300 hover:text-amber-400 transition-all"
-            title="Về Trang Chủ"
-          >
-            <ArrowLeft className="w-5 h-5" />
+          <Link href="/">
+            <Button variant="outline" size="sm">
+              <ArrowLeft className="w-4 h-4 text-peony-700" />
+            </Button>
           </Link>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-bold uppercase tracking-wider">
-                BẢNG QUẢN TRỊ GIẢNG VIÊN
-              </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <Badge variant="blush" size="sm">
+                TRUNG TÂM ĐIỀU HÀNH LỚP HỌC
+              </Badge>
+              <span className="w-2 h-2 rounded-full bg-correct animate-pulse" />
+              <span className="text-[10px] font-mono text-correct-text font-bold">REALTIME TELEMETRY</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black uppercase tracking-wide text-slate-100 mt-0.5">
-              GIÁM SÁT THỜI GIAN THỰC LỚP HỌC (60 SINH VIÊN)
+            <h1 className={`${isProjectorMode ? 'text-2xl sm:text-3xl' : 'text-lg sm:text-2xl'} font-black uppercase tracking-tight text-ink mt-1`}>
+              GIÁM SÁT TIẾN ĐỘ & KẾT QUẢ ĐIỀU HÀNH {stats?.totalPlayers !== undefined ? `(${stats.totalPlayers} SINH VIÊN)` : ''}
             </h1>
-            <p className="text-xs text-slate-400">
-              Môn Chủ nghĩa xã hội khoa học – Chuyên đề Nhà nước XHCN và Nhà nước pháp quyền XHCN
-            </p>
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Action Controls & Projector Mode Toggle */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Export CSV */}
+          {/* Projector Mode Toggle */}
+          <Toggle
+            checked={isProjectorMode}
+            onChange={setIsProjectorMode}
+            label={isProjectorMode ? 'Máy chiếu (Bật)' : 'Chế độ Máy Chiếu'}
+            icon={<Tv className="w-3.5 h-3.5 text-peony-700" />}
+          />
+
+          {/* Export CSV (UTF-8 BOM supported) */}
           <a
-            href="http://localhost:4000/api/admin/export"
+            href={`${API_BASE}/api/admin/export`}
             download="bang_diem_chu_tich_nuoc.csv"
-            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-emerald-600/20 active:scale-95"
           >
-            <Download className="w-4 h-4" />
-            <span>Xuất Bảng Điểm (Excel)</span>
+            <Button variant="secondary" size="sm">
+              <Download className="w-3.5 h-3.5 text-cornflower-700" />
+              <span>Xuất Bảng Điểm</span>
+            </Button>
           </a>
 
           {/* Generate Demo 60 Students */}
-          <button
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleGenerateDemo}
-            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-purple-600/80 hover:bg-purple-500 text-slate-100 font-bold text-xs uppercase tracking-wider transition-all border border-purple-400/40 active:scale-95"
             title="Tạo nhanh 60 sinh viên giả lập để trình chiếu lớp học"
           >
-            <Sparkles className="w-4 h-4 text-purple-300" />
+            <Sparkles className="w-3.5 h-3.5 text-peony" />
             <span>Tạo 60 SV Demo</span>
-          </button>
+          </Button>
 
           {/* Reset Session */}
-          <button
+          <Button
+            variant="coral"
+            size="sm"
             onClick={handleReset}
-            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-rose-900/60 border border-slate-700 hover:border-rose-500 text-slate-300 hover:text-rose-200 font-bold text-xs uppercase tracking-wider transition-all active:scale-95"
           >
-            <RotateCcw className="w-4 h-4" />
-            <span>Làm Mới</span>
-          </button>
+            <RotateCcw className="w-3.5 h-3.5 text-wrong-text" />
+            <span>Làm Mới Phòng</span>
+          </Button>
         </div>
       </header>
 
       {/* Notification Banner */}
       {message && (
-        <div className="max-w-7xl mx-auto my-3 p-3 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-200 text-xs font-bold text-center animate-fade-in">
+        <div className="max-w-7xl mx-auto my-3 p-3 rounded-xl bg-blush-surface border-2 border-peony text-peony-700 text-xs font-bold text-center animate-fade-in shadow-tactile">
           {message}
         </div>
       )}
 
       {/* Class Statistics Overview Cards */}
-      <section className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 my-6">
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase block">Tổng Sinh Viên</span>
+      <section className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 my-4">
+        <div className="p-3.5 rounded-2xl bg-cotton border-2 border-blush-deep/60 shadow-tactile">
+          <span className="text-[10px] font-bold text-ink-muted uppercase block tracking-wider">Tổng Sĩ Số</span>
           <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl sm:text-3xl font-black text-amber-400">{stats?.totalPlayers ?? 0}</span>
-            <span className="text-xs text-slate-500">/ 60 SV</span>
+            <span className={`${isProjectorMode ? 'text-3xl' : 'text-2xl'} font-black text-peony-700 font-mono tabular-nums`}>{stats?.totalPlayers ?? 0}</span>
+            <span className="text-[11px] text-ink-subtle">/ 60 SV</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase block">Đang Chơi</span>
+        <div className="p-3.5 rounded-2xl bg-cotton border-2 border-sky-deep/60 shadow-tactile">
+          <span className="text-[10px] font-bold text-ink-muted uppercase block tracking-wider">Đang Điều Hành</span>
           <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl sm:text-3xl font-black text-sky-400">{stats?.playingCount ?? 0}</span>
-            <span className="text-xs text-slate-500">SV</span>
+            <span className={`${isProjectorMode ? 'text-3xl' : 'text-2xl'} font-black text-cornflower-700 font-mono tabular-nums`}>{stats?.playingCount ?? 0}</span>
+            <span className="text-[11px] text-ink-subtle">SV</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase block">Đã Hoàn Thành</span>
+        <div className="p-3.5 rounded-2xl bg-cotton border-2 border-correct/40 shadow-tactile">
+          <span className="text-[10px] font-bold text-ink-muted uppercase block tracking-wider">Hoàn Thành (30 Lượt)</span>
           <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl sm:text-3xl font-black text-emerald-400">{stats?.completedCount ?? 0}</span>
-            <span className="text-xs text-slate-500">SV</span>
+            <span className={`${isProjectorMode ? 'text-3xl' : 'text-2xl'} font-black text-correct-text font-mono tabular-nums`}>{stats?.completedCount ?? 0}</span>
+            <span className="text-[11px] text-ink-subtle">SV</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase block">Game Over</span>
+        <div className="p-3.5 rounded-2xl bg-cotton border-2 border-wrong/40 shadow-tactile">
+          <span className="text-[10px] font-bold text-ink-muted uppercase block tracking-wider">Khủng Hoảng (Over)</span>
           <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl sm:text-3xl font-black text-rose-400">{stats?.gameOverCount ?? 0}</span>
-            <span className="text-xs text-slate-500">SV</span>
+            <span className={`${isProjectorMode ? 'text-3xl' : 'text-2xl'} font-black text-wrong-text font-mono tabular-nums`}>{stats?.gameOverCount ?? 0}</span>
+            <span className="text-[11px] text-ink-subtle">SV</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase block">Điểm TB Lớp</span>
+        <div className="p-3.5 rounded-2xl bg-cotton border-2 border-highlight/50 shadow-tactile">
+          <span className="text-[10px] font-bold text-ink-muted uppercase block tracking-wider">Điểm TB Lớp</span>
           <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl sm:text-3xl font-black text-yellow-300">{stats?.avgScore ?? 0}</span>
-            <span className="text-xs text-slate-500">/100</span>
+            <span className={`${isProjectorMode ? 'text-3xl' : 'text-2xl'} font-black text-highlight-text font-mono tabular-nums`}>{stats?.avgScore ?? 0}</span>
+            <span className="text-[11px] text-ink-subtle">/ 100</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800">
-          <span className="text-[11px] font-semibold text-slate-400 uppercase block">Lý Luận (CNXHKH)</span>
+        <div className="p-3.5 rounded-2xl bg-cotton border-2 border-sky-deep/60 shadow-tactile">
+          <span className="text-[10px] font-bold text-ink-muted uppercase block tracking-wider">Lý Luận Mác - Lênin</span>
           <div className="flex items-baseline space-x-1 mt-1">
-            <span className="text-2xl sm:text-3xl font-black text-cyan-300">{stats?.avgKnowledge ?? 0}</span>
-            <span className="text-xs text-slate-500">Điểm</span>
+            <span className={`${isProjectorMode ? 'text-3xl' : 'text-2xl'} font-black text-cornflower-700 font-mono tabular-nums`}>{stats?.avgKnowledge ?? 0}</span>
+            <span className="text-[11px] text-ink-subtle">Điểm</span>
           </div>
         </div>
       </section>
 
       {/* Class Average 4 Pillars Bar */}
       {stats && (
-        <section className="max-w-7xl mx-auto my-4 p-4 rounded-2xl bg-slate-900/70 border border-slate-800">
-          <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-amber-300 mb-3">
-            <BarChart3 className="w-4 h-4" />
-            <span>Chỉ Số Quốc Gia Bình Quân Cả Lớp (Mức Độ Cân Bằng Toàn Khóa)</span>
+        <section className="max-w-7xl mx-auto my-3 p-4 rounded-2xl bg-cotton border-2 border-blush-deep/60 shadow-tactile">
+          <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-peony-700 mb-2.5">
+            <BarChart3 className="w-4 h-4 text-peony" />
+            <span>Chỉ Số Quốc Gia Bình Quân Cả Lớp (Mức Độ Cân Bằng Thể Chế)</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-red-500/30">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="p-2.5 rounded-xl bg-blush-surface border border-blush-deep">
               <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-red-400">🏛 Chính Trị</span>
-                <span className="text-slate-200">{stats.avgStats.politics}/100</span>
+                <span className="text-wrong-text text-[11px]">🏛 Chính Trị</span>
+                <span className="text-ink font-mono tabular-nums text-[11px]">{stats.avgStats.politics}/100</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-red-500 rounded-full" style={{ width: `${stats.avgStats.politics}%` }} />
+              <div className="w-full h-2 rounded-pill bg-white overflow-hidden border border-blush-deep/40">
+                <div className="h-full bg-wrong rounded-pill" style={{ width: `${stats.avgStats.politics}%` }} />
               </div>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-emerald-500/30">
+            <div className="p-2.5 rounded-xl bg-correct-surface border border-correct/40">
               <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-emerald-400">💰 Kinh Tế</span>
-                <span className="text-slate-200">{stats.avgStats.economy}/100</span>
+                <span className="text-correct-text text-[11px]">💰 Kinh Tế</span>
+                <span className="text-ink font-mono tabular-nums text-[11px]">{stats.avgStats.economy}/100</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${stats.avgStats.economy}%` }} />
+              <div className="w-full h-2 rounded-pill bg-white overflow-hidden border border-correct/40">
+                <div className="h-full bg-correct rounded-pill" style={{ width: `${stats.avgStats.economy}%` }} />
               </div>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-sky-500/30">
+            <div className="p-2.5 rounded-xl bg-sky-surface border border-sky-deep">
               <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-sky-400">👥 Nhân Dân</span>
-                <span className="text-slate-200">{stats.avgStats.people}/100</span>
+                <span className="text-cornflower-700 text-[11px]">👥 Nhân Dân</span>
+                <span className="text-ink font-mono tabular-nums text-[11px]">{stats.avgStats.people}/100</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-sky-500 rounded-full" style={{ width: `${stats.avgStats.people}%` }} />
+              <div className="w-full h-2 rounded-pill bg-white overflow-hidden border border-sky-deep/40">
+                <div className="h-full bg-cornflower rounded-pill" style={{ width: `${stats.avgStats.people}%` }} />
               </div>
             </div>
 
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-purple-500/30">
+            <div className="p-2.5 rounded-xl bg-blush-surface border border-blush-deep">
               <div className="flex justify-between text-xs font-bold mb-1">
-                <span className="text-purple-400">⚖️ Pháp Quyền</span>
-                <span className="text-slate-200">{stats.avgStats.law}/100</span>
+                <span className="text-peony-700 text-[11px]">⚖️ Pháp Quyền</span>
+                <span className="text-ink font-mono tabular-nums text-[11px]">{stats.avgStats.law}/100</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${stats.avgStats.law}%` }} />
+              <div className="w-full h-2 rounded-pill bg-white overflow-hidden border border-blush-deep/40">
+                <div className="h-full bg-peony rounded-pill" style={{ width: `${stats.avgStats.law}%` }} />
               </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* Filter & Search Bar */}
-      <section className="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 my-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+      {/* Filter, Search & Sort Toolbar */}
+      <section className="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2.5 my-3">
+        {/* Search */}
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-muted" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Tìm theo Họ Tên hoặc MSSV..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 outline-none focus:border-amber-400 transition-all"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-cotton border-2 border-blush-deep text-xs text-ink placeholder:text-ink-subtle outline-none focus:border-peony transition-all"
           />
         </div>
 
-        <div className="flex items-center space-x-2 text-xs">
-          <span className="text-slate-400 font-semibold flex items-center space-x-1">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Lọc:</span>
-          </span>
-          {(['ALL', 'PLAYING', 'COMPLETED', 'GAMEOVER'] as const).map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setStatusFilter(filter)}
-              className={`px-3 py-1.5 rounded-lg font-bold transition-all ${
-                statusFilter === filter
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
-              }`}
+        {/* Filter and Sort Controls */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          {/* Status Filter */}
+          <div className="flex items-center space-x-1 bg-cotton p-0.5 rounded-lg border-2 border-blush-deep">
+            {(['ALL', 'PLAYING', 'COMPLETED', 'GAMEOVER'] as const).map((filter) => (
+              <button
+                key={filter}
+                onClick={() => setStatusFilter(filter)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                  statusFilter === filter
+                    ? 'bg-peony text-white shadow-tactile'
+                    : 'text-ink-muted hover:text-ink'
+                }`}
+              >
+                {filter === 'ALL'
+                  ? 'Tất Cả'
+                  : filter === 'PLAYING'
+                  ? 'Đang Chơi'
+                  : filter === 'COMPLETED'
+                  ? 'Hoàn Thành'
+                  : 'Game Over'}
+              </button>
+            ))}
+          </div>
+
+          {/* Sort Selector */}
+          <div className="flex items-center space-x-1 bg-cotton px-2.5 py-1.5 rounded-lg border-2 border-blush-deep text-[11px]">
+            <ArrowUpDown className="w-3.5 h-3.5 text-peony" />
+            <span className="text-ink-muted font-bold">Sắp xếp:</span>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="bg-transparent text-ink font-semibold outline-none cursor-pointer"
             >
-              {filter === 'ALL'
-                ? 'Tất Cả'
-                : filter === 'PLAYING'
-                ? 'Đang Chơi'
-                : filter === 'COMPLETED'
-                ? 'Hoàn Thành'
-                : 'Game Over'}
-            </button>
-          ))}
+              <option value="SCORE">Điểm Tổng (Cao → Thấp)</option>
+              <option value="TURN">Số Lượt Đạt (Cao → Thấp)</option>
+              <option value="KNOWLEDGE">Điểm Lý Luận</option>
+              <option value="NAME">Họ và Tên (A → Z)</option>
+            </select>
+          </div>
         </div>
       </section>
 
       {/* Live Table for 60 Students */}
-      <main className="max-w-7xl mx-auto rounded-2xl bg-slate-900/90 border border-slate-800 shadow-2xl overflow-hidden my-4">
+      <main className="max-w-7xl mx-auto rounded-2xl bg-cotton border-2 border-blush-deep shadow-dossier overflow-hidden my-3">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs sm:text-sm">
-            <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px] sm:text-xs tracking-wider border-b border-slate-800">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-blush-surface text-ink-muted uppercase text-[10px] tracking-wider border-b border-blush-deep font-bold">
               <tr>
-                <th className="py-3 px-3 text-center">Hạng</th>
-                <th className="py-3 px-3">Họ và Tên</th>
-                <th className="py-3 px-3">MSSV</th>
-                <th className="py-3 px-3 text-center">Lượt</th>
-                <th className="py-3 px-3 text-center">4 Chỉ Số (🏛/💰/👥/⚖️)</th>
-                <th className="py-3 px-3 text-center">Lý Luận</th>
-                <th className="py-3 px-3 text-center">Điểm Tổng</th>
-                <th className="py-3 px-3 text-center">Trạng Thái</th>
-                <th className="py-3 px-3">Xếp Loại / Kết Cục</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'} text-center`}>Hạng</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'}`}>Họ và Tên</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'}`}>MSSV</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'} text-center`}>Tiến Độ</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'} text-center`}>4 Trụ Cột</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'} text-center`}>Lý Luận</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'} text-center`}>Tổng Điểm</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'} text-center`}>Trạng Thái</th>
+                <th className={`${isProjectorMode ? 'py-4 px-4 text-xs font-black' : 'py-3 px-3 text-[10px] font-bold'}`}>Xếp Loại</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-medium">
-              {filteredPlayers.length === 0 ? (
+            <tbody className="divide-y divide-blush-deep/40 font-medium text-ink">
+              {processedPlayers.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-8 text-center text-slate-500 italic">
-                    Chưa có sinh viên nào tham gia hoặc không khớp bộ lọc.
+                  <td colSpan={9} className="py-8 text-center text-ink-muted italic">
+                    {loading ? 'Đang cập nhật danh sách sinh viên...' : 'Chưa có sinh viên nào tham gia hoặc không khớp bộ lọc.'}
                   </td>
                 </tr>
               ) : (
-                filteredPlayers.map((player) => {
+                processedPlayers.map((player) => {
                   const isTop3 = player.rank <= 3;
 
                   return (
                     <tr
                       key={player.id}
-                      className={`hover:bg-slate-800/40 transition-colors ${
-                        isTop3 ? 'bg-amber-500/5' : ''
+                      className={`hover:bg-blush-surface/50 transition-colors ${
+                        isTop3 ? 'bg-highlight-surface/40' : ''
                       }`}
                     >
                       {/* Rank */}
-                      <td className="py-3 px-3 text-center">
-                        {player.rank === 1 ? (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-xs shadow-md">
-                            🥇
-                          </span>
-                        ) : player.rank === 2 ? (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-300 text-slate-950 font-black text-xs shadow-md">
-                            🥈
-                          </span>
-                        ) : player.rank === 3 ? (
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-700 text-amber-100 font-black text-xs shadow-md">
-                            🥉
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-bold">{player.rank}</span>
-                        )}
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-base sm:text-lg' : 'py-2.5 px-3 text-xs'} text-center font-bold`}>
+                        {player.rank === 1 ? '🥇' : player.rank === 2 ? '🥈' : player.rank === 3 ? '🥉' : player.rank}
                       </td>
 
                       {/* Name */}
-                      <td className="py-3 px-3 font-bold text-slate-200">
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-sm sm:text-base' : 'py-2.5 px-3 text-xs'} font-bold text-ink`}>
                         {player.name}
                       </td>
 
                       {/* Student ID */}
-                      <td className="py-3 px-3 text-slate-400 font-mono text-xs">
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-xs' : 'py-2.5 px-3 text-[11px]'} text-ink-muted font-mono`}>
                         {player.studentId}
                       </td>
 
                       {/* Turn */}
-                      <td className="py-3 px-3 text-center font-mono">
-                        <span className="text-amber-400 font-bold">{player.turn}</span>
-                        <span className="text-slate-500 text-[11px]">/{player.maxTurns}</span>
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-sm' : 'py-2.5 px-3 text-xs'} text-center font-mono tabular-nums`}>
+                        <span className="text-peony-700 font-bold">{player.turn}</span>
+                        <span className="text-ink-subtle text-[10px]">/{player.maxTurns}</span>
                       </td>
 
                       {/* 4 Stats Mini Bars */}
-                      <td className="py-3 px-3 text-center">
-                        <div className="inline-flex items-center space-x-1.5 text-[11px] font-mono">
-                          <span className="text-red-400 font-semibold" title="Chính trị">
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-xs' : 'py-2.5 px-3 text-[11px]'} text-center`}>
+                        <div className="inline-flex items-center space-x-1 font-mono tabular-nums">
+                          <span className="text-wrong-text font-bold" title="Chính trị">
                             {Math.round(player.stats.politics)}
                           </span>
-                          <span className="text-slate-600">/</span>
-                          <span className="text-emerald-400 font-semibold" title="Kinh tế">
+                          <span className="text-ink-subtle">/</span>
+                          <span className="text-correct-text font-bold" title="Kinh tế">
                             {Math.round(player.stats.economy)}
                           </span>
-                          <span className="text-slate-600">/</span>
-                          <span className="text-sky-400 font-semibold" title="Nhân dân">
+                          <span className="text-ink-subtle">/</span>
+                          <span className="text-cornflower-700 font-bold" title="Nhân dân">
                             {Math.round(player.stats.people)}
                           </span>
-                          <span className="text-slate-600">/</span>
-                          <span className="text-purple-400 font-semibold" title="Pháp quyền">
+                          <span className="text-ink-subtle">/</span>
+                          <span className="text-peony-700 font-bold" title="Pháp quyền">
                             {Math.round(player.stats.law)}
                           </span>
                         </div>
                       </td>
 
                       {/* Knowledge */}
-                      <td className="py-3 px-3 text-center font-bold text-cyan-400">
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-sm' : 'py-2.5 px-3 text-xs'} text-center font-bold text-cornflower-700 font-mono tabular-nums`}>
                         {player.knowledgeScore}
                       </td>
 
                       {/* Total Score */}
-                      <td className="py-3 px-3 text-center">
-                        <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-black text-sm border border-amber-500/30">
+                      <td className={`${isProjectorMode ? 'py-4 px-4' : 'py-2.5 px-3'} text-center`}>
+                        <span className={`${isProjectorMode ? 'px-3 py-1 text-sm' : 'px-2.5 py-0.5 text-xs'} rounded-pill bg-blush-surface text-peony-700 font-black font-mono tabular-nums border border-blush-deep`}>
                           {player.totalScore}
                         </span>
                       </td>
 
                       {/* Status */}
-                      <td className="py-3 px-3 text-center">
+                      <td className={`${isProjectorMode ? 'py-4 px-4' : 'py-2.5 px-3'} text-center`}>
                         {player.status === 'COMPLETED' ? (
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            <CheckCircle2 className="w-3 h-3" />
+                          <span className={`inline-flex items-center space-x-1 ${isProjectorMode ? 'px-3 py-1 text-[11px]' : 'px-2.5 py-0.5 text-[9px]'} rounded-pill font-bold uppercase tracking-wider bg-correct-surface text-correct-text border border-correct/40`}>
+                            <CheckCircle2 className="w-2.5 h-2.5" />
                             <span>Hoàn thành</span>
                           </span>
                         ) : player.status === 'GAMEOVER' ? (
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                            <XCircle className="w-3 h-3" />
+                          <span className={`inline-flex items-center space-x-1 ${isProjectorMode ? 'px-3 py-1 text-[11px]' : 'px-2.5 py-0.5 text-[9px]'} rounded-pill font-bold uppercase tracking-wider bg-wrong-surface text-wrong-text border border-wrong/40`}>
+                            <XCircle className="w-2.5 h-2.5" />
                             <span>Game Over</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/20 text-sky-300 border border-sky-500/40">
-                            <Clock className="w-3 h-3 animate-spin" />
+                          <span className={`inline-flex items-center space-x-1 ${isProjectorMode ? 'px-3 py-1 text-[11px]' : 'px-2.5 py-0.5 text-[9px]'} rounded-pill font-bold uppercase tracking-wider bg-sky-surface text-cornflower-700 border border-sky-deep`}>
+                            <Clock className="w-2.5 h-2.5 animate-spin" />
                             <span>Đang chơi</span>
                           </span>
                         )}
                       </td>
 
                       {/* Rank Title & Ending */}
-                      <td className="py-3 px-3 text-xs text-slate-300">
+                      <td className={`${isProjectorMode ? 'py-4 px-4 text-xs' : 'py-2.5 px-3 text-[11px]'} text-ink`}>
                         <div className="font-semibold">{player.rankTitle || 'Nhiệm kỳ đang tiếp diễn'}</div>
                         {player.endingTitle && (
-                          <div className="text-[11px] text-slate-400 truncate max-w-xs italic">
+                          <div className="text-[10px] text-ink-muted truncate max-w-xs italic">
                             {player.endingTitle}
                           </div>
                         )}

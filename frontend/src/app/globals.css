@@ -2,90 +2,150 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-cotton: #FFFDFE;
+  --color-blush: #FFE3EE;
+  --color-blush-deep: #FFD1E3;
+  --color-blush-surface: #FFF5F8;
+  --color-peony: #FF7FB0;
+  --color-peony-700: #B33D6E;
+  
+  --color-sky: #CFE8FF;
+  --color-sky-deep: #B6DCFE;
+  --color-sky-surface: #F2F8FF;
+  --color-cornflower: #6FB4F2;
+  --color-cornflower-700: #1A63A8;
+
+  --color-ink: #2A2540;
+  --color-ink-muted: #68627D;
+
+  --color-mint: #8EE3C8;
+  --color-mint-surface: #E8F8F2;
+  --color-mint-text: #14634B;
+
+  --color-coral: #FF6B7F;
+  --color-coral-surface: #FFEBF0;
+  --color-coral-text: #9B1B32;
+
+  --color-honey: #FFD27A;
+  --color-honey-surface: #FFF7E6;
+  --color-honey-text: #7A4B00;
+}
+
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased selection:bg-amber-500/30 selection:text-amber-200;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: var(--color-cotton);
+    color: var(--color-ink);
+    font-feature-settings: "cv02" 0, "cv03" 0, "cv04" 0, "cv11" 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 }
 
-/* Presidential Aesthetic Glows & Effects */
-.gold-glow {
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+/* Living Background - Gentle Low-Contrast Pastel Drift */
+.living-pastel-bg {
+  background-color: #FFFDFE;
+  background-image: 
+    radial-gradient(at 15% 15%, rgba(255, 227, 238, 0.65) 0px, transparent 55%),
+    radial-gradient(at 85% 15%, rgba(207, 232, 255, 0.65) 0px, transparent 55%),
+    radial-gradient(at 50% 90%, rgba(255, 245, 248, 0.7) 0px, transparent 60%);
+  background-attachment: fixed;
 }
 
-.gold-glow-lg {
-  box-shadow: 0 0 45px rgba(212, 175, 55, 0.35);
+/* 3D Dossier Card Stack Structure */
+.card-stack-container {
+  perspective: 1200px;
 }
 
-.gold-gradient-text {
-  background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.pastel-card-stack-back-1 {
+  transform: translateY(8px) scale(0.96);
+  background: #FFF7FA;
+  border: 1.5px solid rgba(255, 127, 176, 0.2);
+  box-shadow: 0 8px 24px -6px rgba(42, 37, 64, 0.05);
 }
 
-.gold-border {
-  border: 1px solid rgba(212, 175, 55, 0.3);
+.pastel-card-stack-back-2 {
+  transform: translateY(16px) scale(0.92);
+  background: #F4F9FF;
+  border: 1.5px solid rgba(111, 180, 242, 0.18);
+  box-shadow: 0 12px 28px -8px rgba(42, 37, 64, 0.04);
 }
 
-.presidential-pattern {
-  background-color: #0b1120;
-  background-image: radial-gradient(rgba(212, 175, 55, 0.07) 1px, transparent 1px),
-                    radial-gradient(rgba(212, 175, 55, 0.05) 1px, #0b1120 1px);
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
+/* Tactile Stamp Effect ("DUYỆT" / "BÁC BỎ") */
+.stamp-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-width: 2.5px;
+  border-radius: 6px;
+  mask-image: radial-gradient(circle at center, black 85%, rgba(0, 0, 0, 0.8) 100%);
 }
 
-/* Custom Scrollbar */
+.stamp-approve {
+  border-color: #14634B;
+  color: #14634B;
+  background-color: rgba(232, 248, 242, 0.95);
+  box-shadow: 0 2px 10px rgba(20, 99, 75, 0.15);
+}
+
+.stamp-reject {
+  border-color: #9B1B32;
+  color: #9B1B32;
+  background-color: rgba(255, 235, 240, 0.95);
+  box-shadow: 0 2px 10px rgba(155, 27, 50, 0.15);
+}
+
+/* Custom Soft Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #FFF7FA;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #FFD1E3;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #d4af37;
+  background: #FF7FB0;
 }
 
-/* Decision Card Styles */
-.decision-card-shadow {
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7),
-              0 0 0 1px rgba(212, 175, 55, 0.25),
-              0 0 20px rgba(15, 23, 42, 0.8);
-}
-
-.decision-card-shadow:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85),
-              0 0 0 1px rgba(212, 175, 55, 0.4),
-              0 0 30px rgba(212, 175, 55, 0.15);
-}
-
-/* Floating number animation */
-@keyframes floatUpFade {
+/* Delta Float Numbers */
+@keyframes floatDeltaSoft {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    transform: translateY(4px) scale(0.9);
   }
-  20% {
+  25% {
     opacity: 1;
-    transform: translateY(0) scale(1.1);
+    transform: translateY(0) scale(1.05);
   }
-  80% {
+  75% {
     opacity: 1;
-    transform: translateY(-20px) scale(1);
+    transform: translateY(-12px) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translateY(-40px) scale(0.9);
+    transform: translateY(-24px) scale(0.92);
   }
 }
 
 .animate-float-delta {
-  animation: floatUpFade 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: floatDeltaSoft 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,6 +1,9 @@
+'use client';
+
 import React from 'react';
 import { CheckCircle2, XCircle, BookOpen, ArrowRight } from 'lucide-react';
 import { sound } from '../lib/sound';
+import { Button } from './ui/Button';
 
 interface KnowledgeModalProps {
   isOpen: boolean;
@@ -20,64 +23,66 @@ export const KnowledgeModal: React.FC<KnowledgeModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-slate-700 p-6 sm:p-7 shadow-2xl overflow-hidden">
-        {/* Top Glow bar */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/25 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg rounded-2xl bg-cotton border-2 border-blush-deep p-5 sm:p-6 shadow-dossier-hover overflow-hidden text-ink">
+        {/* Top Status Accent Bar */}
         <div
           className={`absolute top-0 left-0 right-0 h-2 ${
-            isCorrect ? 'bg-emerald-500' : 'bg-rose-500'
+            isCorrect ? 'bg-correct' : 'bg-wrong'
           }`}
         />
 
         {/* Status Header */}
-        <div className="flex items-center space-x-3 mb-4">
+        <div className="flex items-center space-x-3 mb-4 mt-1">
           {isCorrect ? (
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500 text-emerald-400">
-              <CheckCircle2 className="w-7 h-7" />
+            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-correct-surface border-2 border-correct text-correct-text flex-shrink-0">
+              <CheckCircle2 className="w-6 h-6" />
             </div>
           ) : (
-            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-500/20 border border-rose-500 text-rose-400">
-              <XCircle className="w-7 h-7" />
+            <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-wrong-surface border-2 border-wrong text-wrong-text flex-shrink-0">
+              <XCircle className="w-6 h-6" />
             </div>
           )}
 
           <div>
-            <h3
-              className={`text-lg sm:text-xl font-black tracking-wide ${
-                isCorrect ? 'text-emerald-400' : 'text-rose-400'
+            <span
+              className={`stamp-box text-xs sm:text-sm ${
+                isCorrect ? 'stamp-approve' : 'stamp-reject'
               }`}
             >
-              {isCorrect ? '✓ CHÍNH XÁC!' : '✕ CHƯA CHÍNH XÁC!'}
-            </h3>
-            <p className="text-xs text-slate-400 font-medium">
-              {isCorrect ? `+${knowledgeDelta} Điểm Kiến Thức` : `${knowledgeDelta} Điểm Kiến Thức`}
+              {isCorrect ? '✓ LỰA CHỌN PHÙ HỢP' : '✕ CẦN XEM LẠI'}
+            </span>
+            <p className="text-xs text-ink-muted font-bold mt-1 font-mono">
+              {isCorrect ? `+${knowledgeDelta} Điểm Lý Luận` : `${knowledgeDelta} Điểm Lý Luận`}
             </p>
           </div>
         </div>
 
         {/* Theoretical Explanation */}
-        <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-200 text-sm sm:text-base leading-relaxed my-4">
-          <div className="flex items-center space-x-2 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
-            <BookOpen className="w-4 h-4" />
-            <span>Kiến Thức Chủ Nghĩa Xã Hội Khoa Học</span>
+        <div className="p-4 rounded-xl bg-blush-surface border border-blush-deep/80 text-ink text-sm leading-relaxed my-3">
+          <div className="flex items-center space-x-1.5 text-peony-700 text-xs font-bold uppercase tracking-wider mb-2">
+            <BookOpen className="w-4 h-4 text-peony" />
+            <span>Căn Cứ Lý Luận Khoa Học & Hiến Pháp</span>
           </div>
-          <p className="font-serif italic text-slate-300">
+          <p className="font-sans italic text-ink/90 leading-relaxed">
             {explanation}
           </p>
         </div>
 
-        {/* Continue Button */}
+        {/* Continue Button (CTA: TIẾP TỤC NHIỆM KỲ) */}
         <div className="mt-5 flex justify-end">
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={() => {
               sound.playDecisionClick();
               onContinue();
             }}
-            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-bold text-sm tracking-wide transition-all duration-200 shadow-lg shadow-amber-500/20 active:scale-95"
+            className="w-full sm:w-auto"
           >
-            <span>Tiếp Tục Nhiệm Kỳ</span>
+            <span>TIẾP TỤC NHIỆM KỲ</span>
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

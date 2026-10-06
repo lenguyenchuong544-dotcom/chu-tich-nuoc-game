@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "NestJS Backend for Chu Tich Nuoc - Van Menh Quoc Gia",
   "scripts": {
-    "build": "nest build",
+    "build": "tsc",
     "start": "ts-node src/main.ts",
     "start:dev": "ts-node-dev --respawn src/main.ts",
     "start:prod": "node dist/main"

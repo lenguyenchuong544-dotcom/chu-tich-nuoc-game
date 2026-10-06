@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { DECISION_CARDS, DecisionCard as CardData, GAME_ENDINGS } from '@/data/cards';
 import { StatIndicators, NationalStats, StatDelta, StatPreviewHint } from '@/components/StatIndicators';
@@ -9,8 +9,10 @@ import { KnowledgeModal } from '@/components/KnowledgeModal';
 import { GameOverModal } from '@/components/GameOverModal';
 import { VictoryModal } from '@/components/VictoryModal';
 import { sound } from '@/lib/sound';
-import { Volume2, VolumeX, Shield, Award, Trophy, ArrowLeft, RefreshCw, Radio } from 'lucide-react';
+import { Volume2, VolumeX, BookOpen, Trophy } from 'lucide-react';
 import Link from 'next/link';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 export default function GamePage() {
   const router = useRouter();
@@ -64,14 +66,13 @@ export default function GamePage() {
 
   // Initialize player & build card deck
   useEffect(() => {
-    // Load stored player info
     const storedName = localStorage.getItem('president_name') || 'Chủ tịch nước';
     const storedId = localStorage.getItem('president_student_id') || 'SV' + Math.floor(1000 + Math.random() * 9000);
     setPlayerName(storedName);
     setStudentId(storedId);
 
     // Register with backend
-    fetch('http://localhost:4000/api/player/join', {
+    fetch(`${API_BASE}/api/player/join`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: storedName, studentId: storedId }),
@@ -87,18 +88,14 @@ export default function GamePage() {
         setBackendConnected(false);
       });
 
-    // Start background music on user entry
+    // Start background music
     sound.playBGM();
 
-    // Prepare Cards:
-    // 1. Tutorial cards (1-3)
+    // Prepare Cards: Tutorial (1-3) followed by randomized normal cards
     const tutorialCards = DECISION_CARDS.filter((c) => c.type === 'TUTORIAL');
-    
-    // 2. In-game cards: shuffle them
     const normalCards = DECISION_CARDS.filter((c) => c.type !== 'TUTORIAL');
     const shuffled = [...normalCards].sort(() => Math.random() - 0.5);
 
-    // 3. Chain: 3 tutorials + 35 shuffled cards (total > 30 turns)
     setCardDeck([...tutorialCards, ...shuffled]);
     setDeckIndex(0);
   }, []);
@@ -145,17 +142,17 @@ export default function GamePage() {
     const newKnowledgeScore = Math.max(0, knowledgeScore + deltaK);
     const newTurn = turn + 1;
 
-    // Update setFlags
+    // Update flags
     const newFlags = { ...flags, ...(selectedChoice.setFlags || {}) };
     setFlags(newFlags);
 
-    // Trigger visual delta badge
+    // Trigger visual floating delta
     setRecentDelta(eff);
-    setTimeout(() => setRecentDelta(null), 1800);
+    setTimeout(() => setRecentDelta(null), 1500);
 
     // Sync to backend
     if (playerId) {
-      fetch('http://localhost:4000/api/player/action', {
+      fetch(`${API_BASE}/api/player/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -177,7 +174,7 @@ export default function GamePage() {
     setKnowledgeScore(newKnowledgeScore);
     setTurn(newTurn);
 
-    // Check Game Over
+    // Check Game Over (any stat <= 0)
     if (
       newStats.politics <= 0 ||
       newStats.economy <= 0 ||
@@ -195,7 +192,7 @@ export default function GamePage() {
       sound.playCrisis();
 
       if (playerId) {
-        fetch('http://localhost:4000/api/player/finish', {
+        fetch(`${API_BASE}/api/player/finish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -209,7 +206,7 @@ export default function GamePage() {
       return;
     }
 
-    // Check Victory (End of presidential term)
+    // Check Victory (End of 5-year presidential term: 30 turns)
     if (newTurn >= MAX_TURNS) {
       let victEnding = 'ENDING_STRONG_STATE';
       const avg = (newStats.politics + newStats.economy + newStats.people + newStats.law) / 4;
@@ -246,7 +243,7 @@ export default function GamePage() {
       setGameStatus('COMPLETED');
 
       if (playerId) {
-        fetch('http://localhost:4000/api/player/finish', {
+        fetch(`${API_BASE}/api/player/finish`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -269,7 +266,6 @@ export default function GamePage() {
         knowledgeDelta: deltaK,
       });
     } else {
-      // Advance to next card
       advanceToNextCard();
     }
   };
@@ -294,9 +290,8 @@ export default function GamePage() {
     setCardDeck([...tutorialCards, ...shuffled]);
     setDeckIndex(0);
 
-    // Re-join session in backend
     if (playerName) {
-      fetch('http://localhost:4000/api/player/join', {
+      fetch(`${API_BASE}/api/player/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, studentId }),
@@ -309,83 +304,66 @@ export default function GamePage() {
     setIsMuted(muted);
   };
 
-  // Presidential Year Calculation (1 nhiệm kỳ = 5 năm, 30 lượt = 6 lượt/năm)
-  const currentYear = Math.min(5, Math.max(1, Math.floor(turn / 6) + 1));
+  const displayTitle = playerName.toLowerCase().includes('chủ tịch')
+    ? playerName.toUpperCase()
+    : `CHỦ TỊCH ${playerName.toUpperCase()}`;
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-between py-2 px-3 sm:px-6">
-      {/* Top Presidential Navigation Bar */}
-      <header className="w-full max-w-4xl mx-auto flex items-center justify-between py-2 border-b border-amber-500/20">
-        {/* Presidential Title & Star Emblem */}
-        <div className="flex items-center space-x-2.5">
-          <Link
-            href="/"
-            className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 transition-all"
-            title="Về Trang Chủ"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-
-          <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded-full bg-red-600 border border-yellow-400 flex items-center justify-center text-yellow-300 text-xs font-bold shadow-md">
-              ★
-            </div>
-            <div>
-              <h1 className="text-xs sm:text-sm font-extrabold tracking-wider uppercase text-amber-300">
-                CHỦ TỊCH NƯỚC
-              </h1>
-              <p className="text-[10px] text-slate-400 truncate max-w-[150px] sm:max-w-none">
-                {playerName} ({studentId})
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen sm:h-screen flex flex-col justify-between py-1.5 px-2 sm:px-4 living-pastel-bg text-ink overflow-x-hidden">
+      {/* 1. Pastel Game Header */}
+      <header className="w-full max-w-lg mx-auto flex items-center justify-between py-2 px-3 sm:px-4 rounded-2xl bg-cotton/95 border-2 border-blush-deep/80 shadow-tactile backdrop-blur-md">
+        {/* President Identity */}
+        <div className="flex items-center space-x-2 min-w-0">
+          <span
+            className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+              backendConnected ? 'bg-correct ring-2 ring-correct/40' : 'bg-ink-subtle'
+            }`}
+            title={backendConnected ? 'Máy chủ trực tuyến' : 'Cục bộ'}
+          />
+          <h1 className="text-xs sm:text-sm font-black uppercase tracking-wide text-ink truncate max-w-[130px] sm:max-w-[190px]">
+            {displayTitle}
+          </h1>
         </div>
 
-        {/* Turn, Year, Knowledge & Controls */}
-        <div className="flex items-center space-x-2 sm:space-x-3 text-xs">
-          {/* Realtime Backend Status Indicator */}
-          <div
-            className={`flex items-center space-x-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${
-              backendConnected
-                ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-400'
-                : 'bg-slate-800 border-slate-700 text-slate-400'
-            }`}
-            title={backendConnected ? 'Đang kết nối Bảng xếp hạng Lớp học Realtime' : 'Chế độ Chơi Trực tiếp'}
-          >
-            <Radio className={`w-3 h-3 ${backendConnected ? 'animate-pulse text-emerald-400' : ''}`} />
-            <span className="hidden sm:inline">{backendConnected ? 'Trực Tuyến' : 'Cục Bộ'}</span>
+        {/* Turn Progress, Knowledge Score & Controls */}
+        <div className="flex items-center space-x-1.5 sm:space-x-2 text-xs flex-shrink-0">
+          {/* Progress Pill */}
+          <div className="px-2.5 py-1 rounded-pill bg-blush-surface border border-blush-deep font-mono tabular-nums text-xs font-bold text-peony-700">
+            <span>{turn}</span>
+            <span className="text-ink-subtle">/{MAX_TURNS}</span>
           </div>
 
-          {/* Current Year & Turn Badge */}
-          <div className="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-amber-500/30 text-amber-300 font-bold tracking-wide">
-            <span>Năm {currentYear}</span>
-            <span className="text-slate-500 mx-1">|</span>
-            <span className="text-slate-300">{turn}/{MAX_TURNS}</span>
+          {/* Knowledge Score */}
+          <div
+            className="flex items-center space-x-1 px-2.5 py-1 rounded-pill bg-sky-surface border border-sky-deep font-mono tabular-nums text-xs font-bold text-cornflower-700"
+            title="Điểm hiểu biết lý luận"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-cornflower-700" />
+            <span>{knowledgeScore}</span>
           </div>
 
           {/* Leaderboard Link */}
           <Link
             href="/leaderboard"
-            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition-all font-semibold"
-            title="Xem Bảng Xếp Hạng"
+            className="p-1.5 rounded-lg text-ink-muted hover:text-peony-700 hover:bg-blush-surface transition-colors"
+            title="Bảng Vinh Danh"
           >
-            <Trophy className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Xếp Hạng</span>
+            <Trophy className="w-4 h-4" />
           </Link>
 
-          {/* Audio Mute/Unmute */}
+          {/* Sound Toggle */}
           <button
             onClick={toggleSound}
-            className="p-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-amber-500/50 text-slate-300 hover:text-amber-400 transition-all"
-            title={isMuted ? 'Bật Âm Thanh' : 'Tắt Âm Thanh'}
+            className="p-1.5 rounded-lg text-ink-muted hover:text-peony-700 hover:bg-blush-surface transition-colors"
+            title={isMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
+            {isMuted ? <VolumeX className="w-4 h-4 text-wrong-text" /> : <Volume2 className="w-4 h-4 text-correct-text" />}
           </button>
         </div>
       </header>
 
-      {/* 4 National Stat Indicators Gauge */}
-      <section className="w-full my-1">
+      {/* 2. National Status HUD */}
+      <section className="w-full max-w-lg mx-auto my-0.5">
         <StatIndicators
           stats={stats}
           previewHints={previewHints}
@@ -393,32 +371,37 @@ export default function GamePage() {
         />
       </section>
 
-      {/* Center Main Stage: Interactive Decision Card */}
-      <main className="w-full flex-1 flex flex-col items-center justify-center my-auto py-2">
+      {/* 3. Centerpiece: 3D Dossier Decision Card */}
+      <main className="w-full flex-1 flex flex-col items-center justify-center my-auto py-0.5 max-h-[calc(100vh-140px)]">
         {currentCard ? (
           <DecisionCard
+            key={`card-${currentCard.id}-${turn}`}
             card={currentCard}
             onChoice={handleDecision}
             onPreviewHintChange={(hint) => setPreviewHints(hint)}
             disabled={knowledgeModal.isOpen || gameStatus !== 'PLAYING'}
           />
         ) : (
-          <div className="text-center p-8 text-slate-400">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-amber-400" />
-            <p>Đang chuẩn bị hồ sơ nhiệm kỳ...</p>
+          <div className="text-center p-6 text-ink-muted">
+            <p className="text-sm font-medium">Đang nạp hồ sơ chính sách...</p>
           </div>
         )}
       </main>
 
-      {/* Footer Info & Admin Shortcut */}
-      <footer className="w-full max-w-4xl mx-auto py-2 text-center text-[11px] text-slate-500 border-t border-slate-800/60 flex items-center justify-between">
-        <span>Môn học: Chủ nghĩa xã hội khoa học – Chuyên đề Nhà nước XHCN & Pháp quyền XHCN</span>
-        <Link href="/admin" className="hover:text-amber-400 transition-colors">
-          Cổng Quản Trị Giảng Viên (Admin) →
-        </Link>
+      {/* 4. Compact Footer */}
+      <footer className="w-full max-w-lg mx-auto py-1.5 text-[11px] text-ink-muted flex items-center justify-between gap-1 border-t border-blush-deep/60 text-center">
+        <span>Nhà nước pháp quyền XHCN Việt Nam</span>
+        <div className="flex items-center space-x-3">
+          <Link href="/leaderboard" className="hover:text-peony-700 font-semibold transition-colors">
+            Xếp Hạng
+          </Link>
+          <Link href="/admin" className="hover:text-peony-700 font-semibold transition-colors">
+            Giảng Viên
+          </Link>
+        </div>
       </footer>
 
-      {/* Knowledge Explanation Modal */}
+      {/* Modals */}
       <KnowledgeModal
         isOpen={knowledgeModal.isOpen}
         isCorrect={knowledgeModal.isCorrect}
@@ -430,7 +413,6 @@ export default function GamePage() {
         }}
       />
 
-      {/* Game Over Modal */}
       <GameOverModal
         isOpen={gameStatus === 'GAMEOVER'}
         endingId={endingId}
@@ -440,7 +422,6 @@ export default function GamePage() {
         onRestart={handleRestart}
       />
 
-      {/* Victory Modal */}
       <VictoryModal
         isOpen={gameStatus === 'COMPLETED'}
         endingId={endingId}
