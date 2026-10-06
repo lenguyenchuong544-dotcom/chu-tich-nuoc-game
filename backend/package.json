@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "NestJS Backend for Chu Tich Nuoc - Van Menh Quoc Gia",
   "scripts": {
-    "build": "nest build",
-    "start": "ts-node src/main.ts",
+    "build": "tsc",
+    "start": "node -e \"if (!require('fs').existsSync('dist/main.js')) { require('child_process').execSync('npx tsc', {stdio:'inherit'}) }\" && node dist/main.js",
+    "start:ts": "ts-node src/main.ts",
     "start:dev": "ts-node-dev --respawn src/main.ts",
-    "start:prod": "node dist/main"
+    "start:prod": "node dist/main.js",
+    "tunnel": "ngrok http 4000 --url=resurface-exert-reaffirm.ngrok-free.dev"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.0",
