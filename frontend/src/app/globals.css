@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased selection:bg-amber-500/30 selection:text-amber-200;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    overflow-x: hidden;
+  }
+}
+
+/* Presidential Aesthetic Glows & Effects */
+.gold-glow {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+}
+
+.gold-glow-lg {
+  box-shadow: 0 0 45px rgba(212, 175, 55, 0.35);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border {
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.presidential-pattern {
+  background-color: #0b1120;
+  background-image: radial-gradient(rgba(212, 175, 55, 0.07) 1px, transparent 1px),
+                    radial-gradient(rgba(212, 175, 55, 0.05) 1px, #0b1120 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4af37;
+}
+
+/* Decision Card Styles */
+.decision-card-shadow {
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7),
+              0 0 0 1px rgba(212, 175, 55, 0.25),
+              0 0 20px rgba(15, 23, 42, 0.8);
+}
+
+.decision-card-shadow:hover {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85),
+              0 0 0 1px rgba(212, 175, 55, 0.4),
+              0 0 30px rgba(212, 175, 55, 0.15);
+}
+
+/* Floating number animation */
+@keyframes floatUpFade {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-20px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.9);
+  }
+}
+
+.animate-float-delta {
+  animation: floatUpFade 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production / Build outputs
+dist/
+*/dist/
+.next/
+*/.next/
+out/
+*/out/
+
+# Big installers & binaries in workspace
+*.exe
+*.msi
+*.winmd
+
+# Non-code assets & documents in root
+*.pptx
+*.pdf
+*.ipynb
+*.mp3
+!frontend/public/audio/*.mp3
+
+# Temp & scratch
+scratch/
+prompt_extracted.txt
+*.log
+.DS_Store
+Thumbs.db
+
+# OS / IDE
+.vscode/
+.idea/
+*.swp
