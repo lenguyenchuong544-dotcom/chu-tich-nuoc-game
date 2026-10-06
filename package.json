@@ -1,0 +1,28 @@
+{
+  "name": "chu-tich-nuoc-game",
+  "version": "1.0.0",
+  "description": "Chu Tich Nuoc - Van Menh Quoc Gia | Web Game",
+  "scripts": {
+    "start": "node start.js",
+    "start:client": "npm --prefix frontend run start",
+    "start:server": "npm --prefix backend run start",
+    "client": "npm --prefix frontend run start",
+    "server": "npm --prefix backend run start",
+    "dev:client": "npm --prefix frontend run dev",
+    "dev:server": "npm --prefix backend run start:dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "build:client": "npm --prefix frontend run build",
+    "build:server": "npm --prefix backend run build",
+    "build:export": "npm --prefix frontend run build:export",
+    "tunnel": "ngrok http 4000 --url=resurface-exert-reaffirm.ngrok-free.dev"
+  },
+  "keywords": [
+    "game",
+    "socialism",
+    "vietnam",
+    "nextjs",
+    "nestjs"
+  ],
+  "author": "",
+  "license": "ISC"
+}

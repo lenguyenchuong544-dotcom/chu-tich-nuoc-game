@@ -2,12 +2,16 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Chủ Tịch Nước – Vận Mệnh Quốc Gia | Trò Chơi Chiến Lược & Học Tập",
-  description: "Trò chơi tương tác nhập vai Chủ tịch nước điều hành quốc gia phục vụ học tập môn Chủ nghĩa xã hội khoa học",
+  title: "Chủ Tịch Nước – Vận Mệnh Quốc Gia | Trò Chơi Học Tập & Quyết Sách",
+  description:
+    "Trò chơi tương tác nhập vai Chủ tịch nước điều hành quốc gia phục vụ học tập môn Chủ nghĩa xã hội khoa học",
   icons: {
     icon: "/favicon.ico",
   },
 };
+
+import { MotionProvider } from "@/components/MotionProvider";
+import { AnimatedBackground } from "@/components/AnimatedBackground";
 
 export default function RootLayout({
   children,
@@ -15,17 +19,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="min-h-screen bg-slate-950 text-slate-100 presidential-pattern font-sans flex flex-col justify-between">
-        {children}
+    <html lang="vi">
+      <body
+        className="font-sans min-h-screen bg-cotton text-ink stationery-living-bg flex flex-col justify-between relative"
+      >
+        <MotionProvider>
+          <AnimatedBackground />
+          <div className="relative z-10 flex-1 flex flex-col min-h-screen">
+            {children}
+          </div>
+        </MotionProvider>
       </body>
     </html>
   );
