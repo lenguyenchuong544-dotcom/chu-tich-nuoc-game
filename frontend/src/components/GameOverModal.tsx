@@ -1,6 +1,6 @@
 import React from 'react';
 import { GAME_ENDINGS, GameEnding } from '../data/cards';
-import { Skull, RotateCcw, Trophy, BookOpen } from 'lucide-react';
+import { RotateCcw, Trophy, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 
 interface GameOverModalProps {
@@ -30,56 +30,50 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   const ending: GameEnding =
     GAME_ENDINGS.find((e) => e.id === endingId) || {
       id: 'ENDING_CRISIS_GENERIC',
-      title: 'GAME OVER: NHIỆM KỲ BỊ GIÁN ĐOẠN',
-      subtitle: 'Đất nước mất cân bằng nghiêm trọng',
-      description: 'Một trong các chỉ số quốc gia trọng yếu đã suy giảm về 0, khiến bộ máy nhà nước không thể tiếp tục vận hành bình thường.',
-      badge: '⚠️ Thất Bại Điều Hành',
+      title: 'MẤT CÂN BẰNG THỂ CHẾ QUỐC GIA',
+      subtitle: 'Một chỉ số trọng yếu chạm đáy',
+      description: 'Một trong các trụ cột của nhà nước đã suy giảm hoàn toàn, khiến chính quyền mất đi năng lực quản trị.',
+      badge: '⚠️ Gián Đoạn Nhiệm Kỳ',
       color: '#ef4444',
       conditionDescription: 'Chỉ số chạm đáy 0',
     };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-lg animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-slate-900 border border-rose-500/50 p-6 sm:p-7 shadow-2xl text-center overflow-hidden">
-        {/* Top Warning bar */}
-        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-600 via-red-500 to-rose-600" />
-
-        {/* Icon & Badge */}
-        <div className="flex justify-center mb-4">
-          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/10 border-2 border-rose-500 text-rose-500 animate-pulse">
-            <Skull className="w-8 h-8" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#0f172a] border border-rose-500/40 p-6 sm:p-7 shadow-2xl text-center">
+        {/* Warning Icon & Badge */}
+        <div className="flex justify-center mb-3">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/50 text-rose-400">
+            <AlertTriangle className="w-6 h-6" />
           </div>
         </div>
 
-        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 mb-2">
+        <span className="inline-block px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-300 border border-rose-500/30 mb-2">
           {ending.badge}
         </span>
 
-        <h2 className="text-xl sm:text-2xl font-black text-rose-400 tracking-wide uppercase mt-1">
-          {ending.title}
+        <h2 className="text-xl sm:text-2xl font-black text-slate-100 tracking-wide uppercase">
+          NHIỆM KỲ KẾT THÚC
         </h2>
-        <p className="text-xs sm:text-sm text-slate-400 font-medium italic mt-1">
-          {ending.subtitle}
+        <p className="text-xs text-rose-400 font-semibold mt-1">
+          {ending.title}
         </p>
 
-        {/* Ending Narrative Description */}
-        <div className="my-4 p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-slate-300 text-xs sm:text-sm leading-relaxed text-left font-serif">
+        {/* Narrative Description */}
+        <div className="my-4 p-4 rounded-xl bg-black/40 border border-white/5 text-slate-300 text-xs sm:text-sm leading-relaxed text-left font-serif">
           {ending.description}
         </div>
 
-        {/* Summary Stats Grid */}
-        <div className="grid grid-cols-2 gap-2 my-4 text-xs font-semibold">
-          <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 flex flex-col items-center">
-            <span className="text-slate-400 text-[11px]">LƯỢT ĐÃ TRỤ VỮNG</span>
-            <span className="text-base font-bold text-amber-400 mt-0.5">{turnsSurvived} Lượt</span>
+        {/* Metrics Bar */}
+        <div className="grid grid-cols-2 gap-2 my-4 text-xs">
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+            <span className="text-slate-400 text-[10px] uppercase font-medium block">Số Quyết Định</span>
+            <span className="text-base font-bold text-amber-400 font-mono mt-0.5">{turnsSurvived} / 30</span>
           </div>
 
-          <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700/60 flex flex-col items-center">
-            <span className="text-slate-400 text-[11px] flex items-center space-x-1">
-              <BookOpen className="w-3 h-3 text-cyan-400" />
-              <span>ĐIỂM KIẾN THỨC</span>
-            </span>
-            <span className="text-base font-bold text-cyan-400 mt-0.5">{knowledgeScore} Điểm</span>
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5">
+            <span className="text-slate-400 text-[10px] uppercase font-medium block">Điểm Lý Luận (CNXHKH)</span>
+            <span className="text-base font-bold text-cyan-400 font-mono mt-0.5">{knowledgeScore} Điểm</span>
           </div>
         </div>
 
@@ -87,15 +81,15 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
         <div className="grid grid-cols-2 gap-3 mt-5">
           <button
             onClick={onRestart}
-            className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm tracking-wide transition-all shadow-lg active:scale-95"
+            className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition-all shadow-md active:scale-95"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Chơi Lại Nhiệm Kỳ</span>
+            <span>Nhiệm Kỳ Mới</span>
           </button>
 
           <Link
             href="/leaderboard"
-            className="flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-xs sm:text-sm tracking-wide transition-all active:scale-95"
+            className="flex items-center justify-center space-x-1.5 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 font-bold text-xs uppercase tracking-wider transition-all active:scale-95"
           >
             <Trophy className="w-4 h-4 text-amber-400" />
             <span>Bảng Xếp Hạng</span>

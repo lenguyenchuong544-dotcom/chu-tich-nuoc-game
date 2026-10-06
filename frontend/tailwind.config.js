@@ -22,8 +22,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        serif: ["Merriweather", "Georgia", "serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["Lora", "Merriweather", "Georgia", "serif"],
+        sans: ["'Be Vietnam Pro'", "Inter", "system-ui", "sans-serif"],
       },
       animation: {
         "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",

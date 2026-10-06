@@ -4,10 +4,8 @@
 
 class SoundManager {
   private audioCtx: AudioContext | null = null;
-  private bgmAudio: HTMLAudioElement | null = null;
   private victoryAudio: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
-  private bgmStarted: boolean = false;
 
   private initContext() {
     if (typeof window === 'undefined') return;
@@ -22,37 +20,51 @@ class SoundManager {
     }
   }
 
-  public playBGM() {
-    if (typeof window === 'undefined' || this.isMuted) return;
+  // Âm thanh khởi đầu game: Nhẹ nhàng, trang trọng, đơn giản (Đã bỏ toàn bộ giọng thuyết minh)
+  public playGameStart() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.audioCtx) return;
+
     try {
-      if (!this.bgmAudio) {
-        this.bgmAudio = new Audio('/audio/bgm.mp3');
-        this.bgmAudio.loop = true;
-        this.bgmAudio.volume = 0.28;
-      }
-      this.bgmAudio.play().then(() => {
-        this.bgmStarted = true;
-      }).catch(() => {
-        // Autoplay may be restricted until first user interaction
+      const now = this.audioCtx.currentTime;
+      // Hợp âm vang nhẹ trang nghiêm (C4, G4, C5, E5)
+      const chord = [261.63, 392.0, 523.25, 659.25];
+
+      chord.forEach((freq, idx) => {
+        const osc = this.audioCtx!.createOscillator();
+        const gain = this.audioCtx!.createGain();
+        const startTime = now + idx * 0.06;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, startTime);
+
+        gain.gain.setValueAtTime(0.001, startTime);
+        gain.gain.linearRampToValueAtTime(0.12, startTime + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.9);
+
+        osc.connect(gain);
+        gain.connect(this.audioCtx!.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.95);
       });
-    } catch (e) {
-      console.warn('Cannot play BGM:', e);
-    }
+    } catch (e) {}
   }
 
-  public pauseBGM() {
-    if (this.bgmAudio) {
-      this.bgmAudio.pause();
-    }
+  // Không phát giọng thuyết minh (Giữ trống hoặc chỉ hỗ trợ nhạc nền nhẹ nếu cần)
+  public playBGM() {
+    // Đã bỏ hoàn toàn giọng người dẫn truyện khi bắt đầu
   }
+
+  public pauseBGM() {}
 
   public playVictoryBGM() {
-    this.pauseBGM();
     if (typeof window === 'undefined' || this.isMuted) return;
     try {
       if (!this.victoryAudio) {
         this.victoryAudio = new Audio('/audio/victory.mp3');
-        this.victoryAudio.volume = 0.45;
+        this.victoryAudio.volume = 0.4;
       }
       this.victoryAudio.currentTime = 0;
       this.victoryAudio.play().catch(() => {});
@@ -61,14 +73,8 @@ class SoundManager {
 
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
-    if (this.bgmAudio) {
-      this.bgmAudio.muted = this.isMuted;
-    }
     if (this.victoryAudio) {
       this.victoryAudio.muted = this.isMuted;
-    }
-    if (!this.isMuted && !this.bgmStarted) {
-      this.playBGM();
     }
     return this.isMuted;
   }
@@ -77,7 +83,7 @@ class SoundManager {
     return this.isMuted;
   }
 
-  // Synthesized Sound Effects (No network latency, instant 60fps response)
+  // Tiếng vuốt thẻ sang trái / phải
   public playCardSwipe() {
     if (this.isMuted) return;
     this.initContext();
@@ -103,6 +109,7 @@ class SoundManager {
     } catch (e) {}
   }
 
+  // Tiếng chọn quyết định (Gõ búa pháp đình / đóng dấu)
   public playDecisionClick() {
     if (this.isMuted) return;
     this.initContext();
@@ -110,7 +117,6 @@ class SoundManager {
 
     try {
       const now = this.audioCtx.currentTime;
-      // Gavel wood strike simulation
       const osc = this.audioCtx.createOscillator();
       const gain = this.audioCtx.createGain();
 
@@ -129,6 +135,7 @@ class SoundManager {
     } catch (e) {}
   }
 
+  // Tiếng trả lời đúng câu hỏi lý luận (+10 điểm)
   public playCorrect() {
     if (this.isMuted) return;
     this.initContext();
@@ -158,6 +165,7 @@ class SoundManager {
     } catch (e) {}
   }
 
+  // Tiếng trả lời sai (-5 điểm)
   public playIncorrect() {
     if (this.isMuted) return;
     this.initContext();
@@ -187,6 +195,7 @@ class SoundManager {
     } catch (e) {}
   }
 
+  // Tiếng còi báo động khủng hoảng khẩn cấp
   public playCrisis() {
     if (this.isMuted) return;
     this.initContext();

@@ -4,88 +4,92 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased selection:bg-amber-500/30 selection:text-amber-200;
+    @apply bg-[#080d1a] text-slate-100 antialiased selection:bg-amber-500/20 selection:text-amber-200;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     overflow-x: hidden;
   }
 }
 
-/* Presidential Aesthetic Glows & Effects */
-.gold-glow {
-  box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+/* Presidential Command Center Aesthetic (Refined, Cinematic, No Over-glow) */
+.command-center-bg {
+  background-color: #080d1a;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.05) 0%, transparent 60%),
+    radial-gradient(circle at 80% 100%, rgba(30, 58, 138, 0.08) 0%, transparent 50%);
 }
 
-.gold-glow-lg {
-  box-shadow: 0 0 45px rgba(212, 175, 55, 0.35);
+.gold-accent {
+  color: #d4af37;
 }
 
-.gold-gradient-text {
-  background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #ca8a04 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.border-command {
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.gold-border {
-  border: 1px solid rgba(212, 175, 55, 0.3);
+.border-command-gold {
+  border: 1px solid rgba(212, 175, 55, 0.25);
 }
 
-.presidential-pattern {
-  background-color: #0b1120;
-  background-image: radial-gradient(rgba(212, 175, 55, 0.07) 1px, transparent 1px),
-                    radial-gradient(rgba(212, 175, 55, 0.05) 1px, #0b1120 1px);
-  background-size: 40px 40px;
-  background-position: 0 0, 20px 20px;
+/* Decision Card Briefing Dossier Shadow */
+.briefing-card-shadow {
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.8),
+              0 0 0 1px rgba(212, 175, 55, 0.2);
+}
+
+.briefing-card-shadow:hover {
+  box-shadow: 0 20px 42px -10px rgba(0, 0, 0, 0.9),
+              0 0 0 1px rgba(212, 175, 55, 0.35);
+}
+
+/* Card Stack Layering */
+.card-stack-1 {
+  transform: translate3d(0, 6px, -10px) scale(0.97);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.card-stack-2 {
+  transform: translate3d(0, 12px, -20px) scale(0.94);
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #080d1a;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1e293b;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #d4af37;
 }
 
-/* Decision Card Styles */
-.decision-card-shadow {
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7),
-              0 0 0 1px rgba(212, 175, 55, 0.25),
-              0 0 20px rgba(15, 23, 42, 0.8);
-}
-
-.decision-card-shadow:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85),
-              0 0 0 1px rgba(212, 175, 55, 0.4),
-              0 0 30px rgba(212, 175, 55, 0.15);
-}
-
-/* Floating number animation */
-@keyframes floatUpFade {
+/* Subtle floating numbers */
+@keyframes deltaFloat {
   0% {
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    transform: translateY(8px);
   }
   20% {
     opacity: 1;
-    transform: translateY(0) scale(1.1);
+    transform: translateY(0);
   }
-  80% {
+  75% {
     opacity: 1;
-    transform: translateY(-20px) scale(1);
+    transform: translateY(-16px);
   }
   100% {
     opacity: 0;
-    transform: translateY(-40px) scale(0.9);
+    transform: translateY(-28px);
   }
 }
 
-.animate-float-delta {
-  animation: floatUpFade 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.animate-delta-fade {
+  animation: deltaFloat 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
