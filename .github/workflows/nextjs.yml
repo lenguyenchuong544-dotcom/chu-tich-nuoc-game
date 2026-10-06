@@ -57,6 +57,17 @@ jobs:
           NEXT_PUBLIC_API_URL: "https://resurface-exert-reaffirm.ngrok-free.dev"
         run: npx next build
 
+      - name: Verify static export output
+        run: |
+          echo "Listing frontend contents:"
+          ls -la frontend
+          if [ ! -d "frontend/out" ]; then
+            echo "frontend/out not found!"
+            exit 1
+          fi
+          echo "frontend/out exists! Listing out/:"
+          ls -la frontend/out
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
