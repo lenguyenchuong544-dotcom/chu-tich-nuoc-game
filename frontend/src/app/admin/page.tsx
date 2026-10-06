@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/Button';
 import { Toggle } from '@/components/ui/Toggle';
 import { m } from 'framer-motion';
 import { springs } from '@/lib/motion';
+import { apiFetch, getExportUrl } from '@/lib/api';
 
 interface PlayerRow {
   rank: number;
@@ -73,7 +74,7 @@ export default function AdminPage() {
 
   const fetchAdminData = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/admin/players');
+      const res = await apiFetch('/api/admin/players');
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
@@ -104,7 +105,7 @@ export default function AdminPage() {
       return;
     }
     try {
-      const res = await fetch('http://localhost:4000/api/admin/reset', { method: 'POST' });
+      const res = await apiFetch('/api/admin/reset', { method: 'POST' });
       const data = await res.json();
       setMessage(data.message || 'Đã làm mới phiên thi.');
       fetchAdminData();
@@ -116,7 +117,7 @@ export default function AdminPage() {
 
   const handleGenerateDemo = async () => {
     try {
-      const res = await fetch('http://localhost:4000/api/admin/generate-demo-class', { method: 'POST' });
+      const res = await apiFetch('/api/admin/generate-demo-class', { method: 'POST' });
       const data = await res.json();
       setMessage(data.message || 'Đã tạo 60 sinh viên demo.');
       fetchAdminData();
@@ -297,8 +298,10 @@ export default function AdminPage() {
 
           {/* Export CSV */}
           <a
-            href="http://localhost:4000/api/admin/export"
+            href={getExportUrl()}
             download="bang_diem_chu_tich_nuoc.csv"
+            target="_blank"
+            rel="noopener noreferrer"
           >
             <Button
               variant="outline"

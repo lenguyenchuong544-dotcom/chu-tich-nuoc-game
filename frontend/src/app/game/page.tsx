@@ -11,6 +11,7 @@ import { VictoryModal } from '@/components/VictoryModal';
 import { sound } from '@/lib/sound';
 import { Volume2, VolumeX, Trophy, ArrowLeft, RefreshCw, BookOpen, HelpCircle, X, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
+import { apiFetch } from '@/lib/api';
 
 export default function GamePage() {
   const router = useRouter();
@@ -74,9 +75,8 @@ export default function GamePage() {
     setStudentId(storedId);
 
     // Register with backend
-    fetch('http://localhost:4000/api/player/join', {
+    apiFetch('/api/player/join', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: storedName, studentId: storedId }),
     })
       .then((res) => res.json())
@@ -149,9 +149,8 @@ export default function GamePage() {
     setTimeout(() => setRecentDelta(null), 1600);
 
     if (playerId) {
-      fetch('http://localhost:4000/api/player/action', {
+      apiFetch('/api/player/action', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           playerId,
           turn: newTurn,
@@ -188,9 +187,8 @@ export default function GamePage() {
       sound.playCrisis();
 
       if (playerId) {
-        fetch('http://localhost:4000/api/player/finish', {
+        apiFetch('/api/player/finish', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             playerId,
             status: 'GAMEOVER',
@@ -239,9 +237,8 @@ export default function GamePage() {
       setGameStatus('COMPLETED');
 
       if (playerId) {
-        fetch('http://localhost:4000/api/player/finish', {
+        apiFetch('/api/player/finish', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             playerId,
             status: 'COMPLETED',
@@ -286,9 +283,8 @@ export default function GamePage() {
     setDeckIndex(0);
 
     if (playerName) {
-      fetch('http://localhost:4000/api/player/join', {
+      apiFetch('/api/player/join', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, studentId }),
       }).catch(() => {});
     }

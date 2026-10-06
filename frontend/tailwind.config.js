@@ -70,8 +70,8 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-be-vietnam)", "Nunito", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "monospace"],
+        sans: ["'Be Vietnam Pro'", "var(--font-be-vietnam)", "Nunito", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["'JetBrains Mono'", "var(--font-mono)", "monospace"],
       },
       boxShadow: {
         "pastel-pink": "0 10px 25px -5px rgba(255, 127, 176, 0.22), 0 8px 10px -6px rgba(255, 127, 176, 0.12)",

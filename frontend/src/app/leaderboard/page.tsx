@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Trophy, ArrowLeft, RefreshCw, Crown, Play, Award, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { apiFetch } from '@/lib/api';
 
 interface LeaderboardItem {
   rank: number;
@@ -36,7 +37,7 @@ export default function LeaderboardPage() {
   const fetchLeaderboard = async () => {
     setIsRefreshing(true);
     try {
-      const res = await fetch('http://localhost:4000/api/player/leaderboard?limit=60');
+      const res = await apiFetch('/api/player/leaderboard?limit=60');
       if (res.ok) {
         const data = await res.json();
         if (data.success && data.leaderboard) {

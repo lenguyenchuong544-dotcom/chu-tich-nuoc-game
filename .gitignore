@@ -33,3 +33,7 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Directory junctions / aliases
+/client
+/server

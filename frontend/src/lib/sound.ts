@@ -75,7 +75,8 @@ class SoundManager {
     if (typeof window === 'undefined' || this.isMuted) return;
     try {
       if (!this.victoryAudio) {
-        this.victoryAudio = new Audio('/audio/victory.mp3');
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        this.victoryAudio = new Audio(`${basePath}/audio/victory.mp3`);
       }
       this.victoryAudio.volume = 0.35 * this.volume;
       this.victoryAudio.currentTime = 0;

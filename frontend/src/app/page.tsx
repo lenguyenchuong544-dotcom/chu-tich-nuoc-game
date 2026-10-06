@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { sound } from '@/lib/sound';
 import { Trophy, Users, ArrowRight, Play, BookOpen, Star, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { apiFetch } from '@/lib/api';
 
 export default function HomePage() {
   const router = useRouter();
@@ -31,9 +32,8 @@ export default function HomePage() {
     setIsSubmitting(true);
     sound.playGameStart();
 
-    fetch('http://localhost:4000/api/player/join', {
+    apiFetch('/api/player/join', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: finalName, studentId: finalId }),
     }).catch(() => {});
 

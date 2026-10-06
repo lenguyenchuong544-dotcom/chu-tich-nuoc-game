@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",
-    "start": "next start -p 3000",
+    "build:export": "node -e \"process.env.EXPORT='true'; process.env.NEXT_PUBLIC_BASE_PATH='/chu-tich-nuoc-game'; require('child_process').execSync('npx next build', {stdio:'inherit', env: process.env})\"",
+    "start": "node -e \"if (!require('fs').existsSync('.next')) { require('child_process').execSync('next build', {stdio:'inherit'}) }\" && next start -p 3000",
+    "start:prod": "next start -p 3000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
   },
