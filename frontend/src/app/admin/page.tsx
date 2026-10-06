@@ -70,7 +70,6 @@ export default function AdminPage() {
   const [sortBy, setSortBy] = useState<'SCORE' | 'TURN' | 'KNOWLEDGE' | 'NAME'>('SCORE');
   const [isProjectorMode, setIsProjectorMode] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
-  const [isProjectorMode, setIsProjectorMode] = useState<boolean>(false);
 
   const fetchAdminData = async () => {
     try {
@@ -154,123 +153,6 @@ export default function AdminPage() {
       return 0;
     });
 
-  // Dedicated Lecturer Projector View (Large text, ultra-high contrast, visible from 10 meters)
-  if (isProjectorMode) {
-    const top3 = players.slice(0, 3);
-    const rest = players.slice(3, 15);
-
-    return (
-      <div className="min-h-screen bg-transparent text-ink p-6 sm:p-10 stationery-living-bg flex flex-col justify-between">
-        {/* Projector Header */}
-        <header className="flex items-center justify-between pb-6 border-b-2 border-blush-border">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-peony-500 text-white flex items-center justify-center font-black text-2xl shadow-pastel-pink">
-              ★
-            </div>
-            <div>
-              <span className="text-xs sm:text-sm uppercase font-extrabold tracking-widest text-peony-700 block">
-                TRÌNH CHIẾU HỘI TRƯỜNG GIẢNG ĐƯỜNG • 60 SINH VIÊN
-              </span>
-              <h1 className="text-2xl sm:text-4xl font-black text-ink uppercase tracking-wide">
-                BẢNG VINH DANH TRỰC TIẾP
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white border-2 border-blush-border shadow-xs text-sm sm:text-base font-bold">
-              <span className="w-3.5 h-3.5 rounded-full bg-correct animate-ping" />
-              <span>{players.length} Sinh Viên Tham Gia</span>
-            </div>
-
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setIsProjectorMode(false)}
-              leftIcon={<Minimize2 className="w-5 h-5" />}
-            >
-              Thoát Máy Chiếu
-            </Button>
-          </div>
-        </header>
-
-        {/* Top 3 Giant Podium Cards */}
-        <div className="my-8 grid grid-cols-3 gap-6 max-w-6xl mx-auto w-full items-end">
-          {/* Top 2 */}
-          {top3[1] && (
-            <div className="p-6 rounded-3xl bg-white border-2 border-sky-border shadow-pastel-blue text-center">
-              <span className="text-4xl mb-2 block">🥈</span>
-              <span className="text-xs sm:text-sm uppercase font-extrabold text-cornflower-700 tracking-wider">HẠNG 2 TOÀN KHÓA</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-ink mt-1 truncate">{top3[1].name}</h2>
-              <p className="text-sm sm:text-base font-mono text-ink-muted">{top3[1].studentId}</p>
-              <div className="mt-3 px-5 py-2 rounded-2xl bg-sky-subtle text-cornflower-700 font-black text-xl sm:text-2xl border border-sky-border">
-                {top3[1].totalScore} Điểm
-              </div>
-            </div>
-          )}
-
-          {/* Top 1 - Quán Quân Spotlight */}
-          {top3[0] && (
-            <div className="p-8 rounded-3xl bg-white border-4 border-highlight shadow-dossier text-center transform -translate-y-4">
-              <Crown className="w-12 h-12 text-highlight mx-auto mb-1 animate-bounce" />
-              <span className="text-xs sm:text-sm uppercase font-black text-highlight-text tracking-widest bg-highlight-surface px-4 py-1 rounded-full border border-highlight">
-                QUÁN QUÂN NHIỆM KỲ
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-ink mt-3 truncate">{top3[0].name}</h2>
-              <p className="text-base sm:text-lg font-mono text-ink-muted mt-0.5">{top3[0].studentId}</p>
-              <div className="mt-4 px-6 py-2.5 rounded-2xl bg-highlight-surface text-highlight-text font-black text-3xl sm:text-4xl border-2 border-highlight">
-                {top3[0].totalScore} Điểm
-              </div>
-              <p className="text-sm font-bold text-ink-muted mt-2">{top3[0].rankTitle}</p>
-            </div>
-          )}
-
-          {/* Top 3 */}
-          {top3[2] && (
-            <div className="p-6 rounded-3xl bg-white border-2 border-blush-border shadow-pastel-pink text-center">
-              <span className="text-4xl mb-2 block">🥉</span>
-              <span className="text-xs sm:text-sm uppercase font-extrabold text-peony-700 tracking-wider">HẠNG 3 TOÀN KHÓA</span>
-              <h2 className="text-2xl sm:text-3xl font-black text-ink mt-1 truncate">{top3[2].name}</h2>
-              <p className="text-sm sm:text-base font-mono text-ink-muted">{top3[2].studentId}</p>
-              <div className="mt-3 px-5 py-2 rounded-2xl bg-blush text-peony-700 font-black text-xl sm:text-2xl border border-blush-border">
-                {top3[2].totalScore} Điểm
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Projector Mini Live Stream Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-6xl mx-auto w-full my-4">
-          {rest.map((p) => (
-            <div
-              key={p.id}
-              className="p-3.5 rounded-2xl bg-white border border-blush-border shadow-sm flex items-center justify-between"
-            >
-              <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-base text-ink-muted w-6 text-center">
-                  #{p.rank}
-                </span>
-                <div>
-                  <h4 className="text-sm sm:text-base font-bold text-ink truncate max-w-[140px]">{p.name}</h4>
-                  <span className="text-xs font-mono text-ink-muted">{p.turn}/30 lượt</span>
-                </div>
-              </div>
-              <span className="font-mono font-black text-sm sm:text-base text-peony-700 px-2.5 py-1 rounded-xl bg-blush border border-blush-border">
-                {p.totalScore}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Projector Footer */}
-        <footer className="text-center text-xs sm:text-sm text-ink-muted pt-4 border-t border-blush-border">
-          Môn học: Chủ nghĩa xã hội khoa học – Dữ liệu cập nhật trực tiếp qua WebSocket
-        </footer>
-      </div>
-    );
-  }
-
-  // Standard Lecturer Dashboard View
   return (
     <div className={`min-h-screen living-pastel-bg text-ink p-3 sm:p-6 transition-all ${isProjectorMode ? 'p-6 sm:p-10' : ''}`}>
       {/* Header - Classroom Mission Control */}
@@ -535,9 +417,7 @@ export default function AdminPage() {
                   const isTop3 = player.rank <= 3;
 
                   return (
-                    <m.tr
-                      layout
-                      transition={springs.scoreboardRow}
+                    <tr
                       key={player.id}
                       className={`hover:bg-blush-surface/50 transition-colors ${
                         isTop3 ? 'bg-highlight-surface/40' : ''
@@ -626,7 +506,7 @@ export default function AdminPage() {
                           </div>
                         )}
                       </td>
-                    </m.tr>
+                    </tr>
                   );
                 })
               )}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { DECISION_CARDS, DecisionCard as CardData } from '@/data/cards';
+import { DECISION_CARDS, DecisionCard as CardData, GAME_ENDINGS } from '@/data/cards';
 import { StatIndicators, NationalStats, StatDelta, StatPreviewHint } from '@/components/StatIndicators';
 import { DecisionCard } from '@/components/DecisionCard';
 import { KnowledgeModal } from '@/components/KnowledgeModal';
@@ -11,7 +11,6 @@ import { VictoryModal } from '@/components/VictoryModal';
 import { sound } from '@/lib/sound';
 import { Volume2, VolumeX, BookOpen, Trophy } from 'lucide-react';
 import Link from 'next/link';
-import { apiFetch } from '@/lib/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -20,16 +19,12 @@ export default function GamePage() {
 
   // Player identity
   const [playerName, setPlayerName] = useState<string>('Chủ tịch nước');
-  const [studentId, setStudentId] = useState<string>('SV');
+  const [studentId, setStudentId] = useState<string>('K65_SV');
   const [playerId, setPlayerId] = useState<string>('');
   const [backendConnected, setBackendConnected] = useState<boolean>(false);
 
   // Sound state
   const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(0.5);
-
-  // Onboarding guidance
-  const [showGuide, setShowGuide] = useState<boolean>(true);
 
   // Game state
   const [stats, setStats] = useState<NationalStats>({
@@ -79,6 +74,7 @@ export default function GamePage() {
     // Register with backend
     fetch(`${API_BASE}/api/player/join`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: storedName, studentId: storedId }),
     })
       .then((res) => res.json())
@@ -104,21 +100,25 @@ export default function GamePage() {
     setDeckIndex(0);
   }, []);
 
+  // Current Card
   const currentCard = useMemo(() => {
     if (!cardDeck.length) return null;
     return cardDeck[deckIndex] || cardDeck[cardDeck.length - 1];
   }, [cardDeck, deckIndex]);
 
+  // Handle player choice (Left or Right)
   const handleDecision = (choice: 'left' | 'right') => {
     if (!currentCard || gameStatus !== 'PLAYING') return;
 
     const selectedChoice = choice === 'left' ? currentCard.leftChoice : currentCard.rightChoice;
     const eff = selectedChoice.effects;
 
+    // Check crisis
     if (currentCard.isCrisis) {
       setCrisesSolved((prev) => prev + 1);
     }
 
+    // Calculate new stats
     const newStats: NationalStats = {
       politics: Math.max(0, Math.min(100, stats.politics + eff.politics)),
       economy: Math.max(0, Math.min(100, stats.economy + eff.economy)),
@@ -126,6 +126,7 @@ export default function GamePage() {
       law: Math.max(0, Math.min(100, stats.law + eff.law)),
     };
 
+    // Calculate knowledge delta
     let deltaK = 0;
     let isCorrectChoice = false;
     if (currentCard.type === 'KNOWLEDGE') {
@@ -149,9 +150,11 @@ export default function GamePage() {
     setRecentDelta(eff);
     setTimeout(() => setRecentDelta(null), 1500);
 
+    // Sync to backend
     if (playerId) {
       fetch(`${API_BASE}/api/player/action`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           playerId,
           turn: newTurn,
@@ -166,6 +169,7 @@ export default function GamePage() {
       }).catch(() => {});
     }
 
+    // Update state
     setStats(newStats);
     setKnowledgeScore(newKnowledgeScore);
     setTurn(newTurn);
@@ -190,6 +194,7 @@ export default function GamePage() {
       if (playerId) {
         fetch(`${API_BASE}/api/player/finish`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             playerId,
             status: 'GAMEOVER',
@@ -240,6 +245,7 @@ export default function GamePage() {
       if (playerId) {
         fetch(`${API_BASE}/api/player/finish`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             playerId,
             status: 'COMPLETED',
@@ -251,6 +257,7 @@ export default function GamePage() {
       return;
     }
 
+    // Handle Knowledge Modal
     if (currentCard.type === 'KNOWLEDGE') {
       setKnowledgeModal({
         isOpen: true,
@@ -286,6 +293,7 @@ export default function GamePage() {
     if (playerName) {
       fetch(`${API_BASE}/api/player/join`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, studentId }),
       }).catch(() => {});
     }
@@ -352,7 +360,7 @@ export default function GamePage() {
             {isMuted ? <VolumeX className="w-4 h-4 text-wrong-text" /> : <Volume2 className="w-4 h-4 text-correct-text" />}
           </button>
         </div>
-      </div>
+      </header>
 
       {/* 2. National Status HUD */}
       <section className="w-full max-w-lg mx-auto my-0.5">

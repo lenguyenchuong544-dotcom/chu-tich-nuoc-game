@@ -25,18 +25,20 @@ export default function HomePage() {
 
   const handleStartGame = (e: React.FormEvent) => {
     e.preventDefault();
-    const finalName = playerName.trim() || 'Chủ tịch nước';
+    const finalName = playerName.trim() || 'Chủ tịch danh dự';
     const finalId = studentId.trim() || 'SV_' + Math.floor(1000 + Math.random() * 9000);
 
     localStorage.setItem('president_name', finalName);
     localStorage.setItem('president_student_id', finalId);
 
     setIsSubmitting(true);
-    sound.playGameStart();
+    sound.playDecisionClick();
+    sound.playBGM();
 
     // Register with backend in background
     fetch(`${API_BASE}/api/player/join`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: finalName, studentId: finalId }),
     }).catch(() => {});
 
@@ -87,6 +89,7 @@ export default function HomePage() {
               NGUYÊN THỦ QUỐC GIA
             </Badge>
           </div>
+        </div>
 
         {/* Big Grand Titles */}
         <h1 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-ink mt-3 font-sans">

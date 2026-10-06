@@ -28,16 +28,12 @@ interface StatIndicatorsProps {
   stats: NationalStats;
   previewHints?: StatPreviewHint | null;
   recentDelta?: StatDelta | null;
-  layout?: 'horizontal' | 'grid2x2' | 'stacked';
-  className?: string;
 }
 
 export const StatIndicators: React.FC<StatIndicatorsProps> = ({
   stats,
   previewHints,
   recentDelta,
-  layout = 'horizontal',
-  className = '',
 }) => {
   const statConfig = [
     {
@@ -81,13 +77,6 @@ export const StatIndicators: React.FC<StatIndicatorsProps> = ({
       textColor: 'text-peony-700',
     },
   ];
-
-  const gridClass =
-    layout === 'grid2x2'
-      ? 'grid grid-cols-2 gap-3'
-      : layout === 'stacked'
-      ? 'grid grid-cols-1 gap-2.5'
-      : 'grid grid-cols-4 gap-2.5';
 
   return (
     <div className="w-full max-w-lg mx-auto px-1 sm:px-2 py-1">

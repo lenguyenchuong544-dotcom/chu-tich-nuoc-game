@@ -32,9 +32,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { MotionProvider } from "@/components/MotionProvider";
-import { AnimatedBackground } from "@/components/AnimatedBackground";
-
 export default function RootLayout({
   children,
 }: {
